@@ -6,7 +6,7 @@ use Test2::Bundle::Extended;
 
 # Testing-related modules
 use File::Temp qw( tempfile ); # Function to create a temporary file
-use Path::Tiny qw( path     ); # 
+use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
 use Carp       qw( croak    ); # Function to emit errors that blame the calling code
 
 # Create input file
@@ -33,12 +33,6 @@ sub filename_fastq {
     my ( $fh, $filename ) = tempfile();
     my $string = fastq();
     print {$fh} $string;
-    close $fh;
-    return $filename;
-}
-
-sub temp_filename {
-    my ( $fh, $filename ) = tempfile();
     close $fh;
     return $filename;
 }
