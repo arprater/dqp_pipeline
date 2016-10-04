@@ -19,7 +19,7 @@ The script will translate one cDNA Fasta file to a protein Fasta file
 
 =head2 Reporting Bugs
 
-Report bugs via GitHub (). 
+Report bugs via GitHub (https://github.com/MU-IRCF/dqp_pipeline/issues). 
 
 =head1 AUTHORS
 
@@ -31,7 +31,9 @@ Report bugs via GitHub ().
 use Bio::SeqIO;
 
 # Capture the first command line argument as the file name
-my $filename_in = shift;
+my $filename_in = shift // exit_giving_usage();
+
+exit_giving_usage() if index($filename_in, '-') == 0;
 
 # Find out the format from the second command line argument or default to FASTQ
 my ($format)    = shift // 'fastq';
@@ -40,7 +42,7 @@ my ($format)    = shift // 'fastq';
 my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
 
 # Create output file handle
-open(my $fh_out, '>',  "$filename_in.aa" );
+open(my $fh_out, '>',  "$filename_in.aa.fa" );
 
 while( (my $seq = $seqin->next_seq()) ) {
     my $pseq = $seq->translate();
@@ -64,3 +66,16 @@ while( (my $seq = $seqin->next_seq()) ) {
 
 # Close the output file
 close($fh_out);
+
+sub exit_giving_usage 
+{
+    say <<"END";
+USAGE:
+    $0 in_file_name.fa [format]
+
+    Input format can be "fastq" (default) or "fasta".
+    Input file name can be anything.
+    Output file will be named the same as the input file with "aa.fa" appended to it.
+END
+    exit;
+}

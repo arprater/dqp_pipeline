@@ -10,7 +10,7 @@ use Path::Tiny qw( path     ); #
 use Carp       qw( croak    ); # Function to emit errors that blame the calling code
 
 my $input_filename = filename_fastq(); 
-my $output_filename = "$input_filename.aa";
+my $output_filename = "$input_filename.aa.fa";
 
 system("bin/trans_cdna $input_filename");
 
