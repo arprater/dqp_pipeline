@@ -1,0 +1,66 @@
+#!/bin/env perl
+use 5.010;
+use strict;
+use warnings;
+
+=head1 NAME
+
+trans_cdna - translates a cDNA sequence
+
+=head1 SYNOPSIS
+
+trans_cdna E<lt> cdna_cds.fa E<gt> protein.fa
+
+=head1 DESCRIPTION 
+
+The script will translate one cDNA Fasta file to a protein Fasta file
+
+=head1 FEEDBACK
+
+=head2 Reporting Bugs
+
+Report bugs via GitHub (). 
+
+=head1 AUTHORS
+
+  Ewan Birney (original script was called "translate_seq")
+  Christopher Bottoms (adapted to work with explicit input and output file names)
+
+=cut
+
+use Bio::SeqIO;
+
+# Capture the first command line argument as the file name
+my $filename_in = shift;
+
+# Find out the format from the second command line argument or default to FASTQ
+my ($format)    = shift // 'fastq';
+
+# input stream for sequences
+my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
+
+# Create output file handle
+open(my $fh_out, '>',  "$filename_in.aa" );
+
+while( (my $seq = $seqin->next_seq()) ) {
+    my $pseq = $seq->translate();
+    my $just_aa = $pseq->seq();
+
+    # Find stop codon, if any
+    my $first_stop_codon_index = index($just_aa, '*');
+
+    # Skip this sequence if it starts with a stop codon`
+    next if $first_stop_codon_index == 0;
+
+    # Trim starting at the stop codon, if present
+    if ($first_stop_codon_index > 0)
+    {
+        $just_aa = substr($just_aa, 0, $first_stop_codon_index);
+    }
+
+    # write out the translated sequence
+    print {$fh_out} ">", $seq->id(), "\n", $just_aa, "\n";
+}
+
+# Close the output file
+close($fh_out);
