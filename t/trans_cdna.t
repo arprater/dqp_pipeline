@@ -9,7 +9,10 @@ use File::Temp qw( tempfile ); # Function to create a temporary file
 use Path::Tiny qw( path     ); # 
 use Carp       qw( croak    ); # Function to emit errors that blame the calling code
 
+# Create input file
 my $input_filename = filename_fastq(); 
+
+# Create expected output file name
 my $output_filename = "$input_filename.aa.fa";
 
 system("bin/trans_cdna $input_filename");
@@ -21,6 +24,8 @@ my $result = path($output_filename)->slurp_utf8;
 
 is($result, $expected, 'correctly translated cDNA');
 
+delete_temp_file( $input_filename);
+delete_temp_file( $output_filename);
 
 done_testing();
 
@@ -41,7 +46,7 @@ sub temp_filename {
 sub delete_temp_file {
     my $filename  = shift;
     my $delete_ok = unlink $filename;
-    ok( $delete_ok, "deleted temp file '$filename'" );
+    diag( "deleted temp file '$filename'" );
 }
 
 sub expected
