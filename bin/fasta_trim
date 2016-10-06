@@ -1,0 +1,88 @@
+#!/bin/env perl
+use 5.010;
+use strict;
+use warnings;
+use autodie;
+
+################################################################################
+# handle command line arguments
+#------------------------------------------------------------------------------
+
+# Capture the first command line argument as the file name
+my $filename_in = shift // exit_giving_usage();
+
+# Get the starting and ending adapter sequences from the command line
+my $pre_capture_oligo  = shift // exit_giving_usage();
+my $post_capture_oligo = shift // exit_giving_usage();
+
+# If there is a command flag, exit and give the usage information (because we're not using flags)
+exit_giving_usage() if grep { looks_like_flag($_) } ( $filename_in, $pre_capture_oligo, $post_capture_oligo);
+
+#------------------------------------------------------------------------------
+################################################################################
+
+# create input and output file handles
+open( my $fh_in,  '<', $filename_in              );
+open( my $fh_out, '>', "$filename_in.trimmed.fa" );
+
+while( my $header = readline $fh_in)
+{ 
+    my $sequence = readline $fh_in;
+    chomp($header, $sequence);
+
+    if ( $sequence =~ / $pre_capture_oligo ( .+ ) $post_capture_oligo /xms )
+    {
+        $sequence = $1;
+        say $fh_out $header;
+        say $fh_out $sequence;
+    }
+}
+
+# Close the output file
+close($fh_out);
+
+sub exit_giving_usage 
+{
+    say <<"END";
+USAGE:
+    $0 in_file_name.fa pre_capture_oligo post_capture_oligo 
+
+    Input file name can be anything.
+    Output file will be named the same as the input file with "trimmed.fa" appended to it.
+
+    "pre_capture_oligo" is conserved sequence right before the variable region
+    "post_capture_oligo" is conserved sequence right after the variable region
+END
+    exit;
+}
+
+sub looks_like_flag 
+{
+    my $arg = shift;
+    return index($arg, '-') == 0;
+}
+
+
+=head1 NAME
+
+fasta_trim - translates a cDNA sequence
+
+=head1 SYNOPSIS
+
+fasta_trim E<lt> filename.fa E<gt>
+
+=head1 DESCRIPTION 
+
+The script will trim one Fasta nucleotide file
+
+=head1 FEEDBACK
+
+=head2 Reporting Bugs
+
+Report bugs via GitHub (https://github.com/MU-IRCF/dqp_pipeline/issues). 
+
+=head1 AUTHORS
+
+  Christopher Bottoms
+
+=cut

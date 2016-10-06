@@ -40,7 +40,7 @@ sub filename_fasta {
 sub delete_temp_file {
     my $filename  = shift;
     my $delete_ok = unlink $filename;
-    diag( "deleted temp file '$filename'" );
+    # diag( "deleted temp file '$filename'" );
 }
 
 sub expected
