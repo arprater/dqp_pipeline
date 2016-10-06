@@ -10,7 +10,7 @@ use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a st
 use Carp       qw( croak    ); # Function to emit errors that blame the calling code
 
 # Create input file
-my $input_filename = filename_fastq(); 
+my $input_filename = filename_fasta(); 
 
 # Create expected output file name
 my $output_filename = "$input_filename.aa.fa";
@@ -29,9 +29,9 @@ delete_temp_file( $output_filename);
 
 done_testing();
 
-sub filename_fastq {
+sub filename_fasta {
     my ( $fh, $filename ) = tempfile();
-    my $string = fastq();
+    my $string = fasta();
     print {$fh} $string;
     close $fh;
     return $filename;
@@ -51,12 +51,10 @@ SMTDLLSA
 END
 }
 
-sub fastq
+sub fasta
 {
     return <<'END';
-@parvalbumin-tidbit
+>parvalbumin-tidbit
 TCGATGACAGACTTGCTCAGCGCTUAG
-+
-<#05=@?#2@@@@@??@#3@>@@@#1:
 END
 }

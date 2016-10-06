@@ -36,7 +36,7 @@ my $filename_in = shift // exit_giving_usage();
 exit_giving_usage() if index($filename_in, '-') == 0;
 
 # Find out the format from the second command line argument or default to FASTQ
-my ($format)    = shift // 'fastq';
+my ($format)    = shift // 'fasta';
 
 # input stream for sequences
 my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
