@@ -1,0 +1,110 @@
+#!/bin/env perl
+use 5.010;
+use strict;
+use warnings;
+use autodie;
+
+################################################################################
+# handle command line arguments
+#------------------------------------------------------------------------------
+
+# Capture the first command line argument as the file name
+my $filename_in = shift // exit_giving_usage();
+
+# If there is a command flag, exit and give the usage information (because we're not using flags)
+exit_giving_usage() if looks_like_flag($filename_in);
+
+#------------------------------------------------------------------------------
+################################################################################
+
+# create input and output file handles
+open( my $fh_in,    '<', $filename_in              );
+open( my $fh_out,   '>', "$filename_in.count.fa" );
+open( my $fh_table, '>', "$filename_in.tab.txt" );
+
+my %count_for;
+
+my $total_sequence_count;
+
+while( my $header = readline $fh_in)
+{ 
+    my $sequence = readline $fh_in;
+    chomp $sequence;
+
+    $count_for{$sequence} +=1;
+    $total_sequence_count +=1;
+}
+
+my @sorted_sequences = sort { $count_for{$b} <=> $count_for{$a} } keys %count_for;
+
+
+my $last_count = 999_999_999_999_999_999_999_999_999_999_999; # Effectively infinite read counts (as of 2016)
+
+my $rank       = 0;
+
+for my $sequence (@sorted_sequences)
+{
+    # get current count for this sequence
+    my $current_count = $count_for{$sequence};
+
+    # increment rank if 
+    $rank++ if $current_count < $last_count; 
+
+    # Store current count as last count for the next pass of the loop
+    $last_count = $current_count;
+
+    # Calculate reads per million
+    my $RPM = 1_000_000 * $current_count / $total_sequence_count;
+   
+    # Print record to FASTA file
+    say {$fh_out}   ">$sequence-$rank-$current_count-$RPM\n$sequence";
+
+    # Print record to tab-delimited file
+    say {$fh_table} join("\t",$sequence,$rank,$current_count,$RPM);
+}
+
+# Close the output file
+close($fh_out);
+
+sub exit_giving_usage 
+{
+    say <<"END";
+USAGE:
+    $0 in_file_name.fa
+
+    Input file name can be anything.
+    Output files will be named the same as the input file with "count.fa" or "tab.txt" appended to it.
+END
+    exit;
+}
+
+sub looks_like_flag 
+{
+    my $arg = shift;
+    return index($arg, '-') == 0;
+}
+
+
+=head1 NAME
+
+fasta_trim - translates a cDNA sequence
+
+=head1 SYNOPSIS
+
+fasta_trim E<lt> filename.fa E<gt>
+
+=head1 DESCRIPTION 
+
+The script will trim one Fasta nucleotide file
+
+=head1 FEEDBACK
+
+=head2 Reporting Bugs
+
+Report bugs via GitHub (https://github.com/MU-IRCF/dqp_pipeline/issues). 
+
+=head1 AUTHORS
+
+  Christopher Bottoms
+
+=cut
