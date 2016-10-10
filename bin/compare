@@ -1,0 +1,122 @@
+#!/bin/env perl
+use 5.010;
+use strict;
+use warnings;
+use autodie;
+
+use List::MoreUtils qw( uniq );
+
+use File::Basename;
+
+my $DEFAULT_RPM = 0.001;
+
+################################################################################
+# handle command line arguments
+#------------------------------------------------------------------------------
+
+# Capture the first command line argument as the file name
+my $filename_n = shift // exit_giving_usage();
+my $filename_t = shift // exit_giving_usage();
+
+# If there is a command flag, exit and give the usage information (because we're not using flags)
+exit_giving_usage() if grep { looks_like_flag($_) } ( $filename_n, $filename_t);
+
+#------------------------------------------------------------------------------
+################################################################################
+
+# create input and output file handles
+open( my $fh_out,  '>', basename($filename_n) . '.compared_to.' . basename($filename_t) . '.txt' );
+say {$fh_out} "seq\tRPMn\tRPMt\tlog2(RPMt/RPMn)";
+
+my %RPM_for_n = read_RPMs_for($filename_n);
+my %RPM_for_t = read_RPMs_for($filename_t);
+
+my @sequences = uniq( (keys %RPM_for_n), (keys %RPM_for_t) );
+
+my %log2_for;
+
+for my $seq ( @sequences)
+{
+    my $RPM_t = $RPM_for_t{$seq} // $DEFAULT_RPM;
+    my $RPM_n = $RPM_for_n{$seq} // $DEFAULT_RPM;
+    $log2_for{$seq} = log2($RPM_t/$RPM_n);
+}
+
+my @sorted_seqs = sort { $log2_for{$b} <=> $log2_for{$a} } keys %log2_for;
+
+for my $seq (@sorted_seqs)
+{
+    # We expect some of these to be uninitialized and printing nothing is exactly what we want for them
+    no warnings 'uninitialized';
+
+	say {$fh_out} join("\t", $seq, $RPM_for_n{$seq}, $RPM_for_t{$seq}, $log2_for{$seq} ); 
+}
+
+# Close the output file
+close($fh_out);
+
+
+sub read_RPMs_for 
+{
+    my $file_name = shift;
+
+    open(my $fh, '<', $file_name);
+    
+    my %RPM_for;
+
+    while (my $line = readline $fh)
+    {
+        chomp $line;
+        my ($seq, $RPM) = (split /\t/, $line)[0,3];
+        $RPM_for{$seq} = $RPM;
+    }
+
+    return %RPM_for;
+}
+
+sub exit_giving_usage 
+{
+    say <<"END";
+USAGE:
+    $0 negative_count_table_filename target_count_table_filename
+
+    Output files will be named like "negative_count_table_filename.compared_to.target_count_table_filename.compare.txt"
+END
+    exit;
+}
+
+sub looks_like_flag 
+{
+    my $arg = shift;
+    return index($arg, '-') == 0;
+}
+
+sub log2 {
+    my $n = shift;
+    return log($n)/log(2);
+}
+
+
+=head1 NAME
+
+fasta_trim - translates a cDNA sequence
+
+=head1 SYNOPSIS
+
+fasta_trim E<lt> filename.fa E<gt>
+
+=head1 DESCRIPTION 
+
+The script will trim one Fasta nucleotide file
+
+=head1 FEEDBACK
+
+=head2 Reporting Bugs
+
+Report bugs via GitHub (https://github.com/MU-IRCF/dqp_pipeline/issues). 
+
+=head1 AUTHORS
+
+  Christopher Bottoms
+
+=cut
