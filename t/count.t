@@ -4,6 +4,8 @@ use warnings;
 
 use Test2::Bundle::Extended;
 
+use File::Basename;
+
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
 use File::Temp qw( tempfile ); # Function to create a temporary file
@@ -15,8 +17,8 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     my $input_filename = filename_fasta(); 
     
     # Create expected output file name
-    my $output_fasta = "$input_filename.count.fa";
-    my $output_table = "$input_filename.tab.txt";
+    my $output_fasta = remove_path_and_ext($input_filename) . '.count.fa';
+    my $output_table = remove_path_and_ext($input_filename) . '.tab.txt';
     
     system("bin/count $input_filename");
     
@@ -112,4 +114,12 @@ ATGACAGACTTGCTCAGCGCT\t1\t2\t400000
 TCGATGACAGACTTGCTCAGCGCT\t1\t2\t400000
 ACAGACTTGCTCAGCGCT\t2\t1\t200000
 END
+}
+
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    my $basename = basename($extensionless_name);
+    return $basename;
 }

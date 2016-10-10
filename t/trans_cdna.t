@@ -4,6 +4,8 @@ use warnings;
 
 use Test2::Bundle::Extended;
 
+use File::Basename;
+
 # Testing-related modules
 use File::Temp qw( tempfile ); # Function to create a temporary file
 use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
@@ -13,7 +15,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 my $input_filename = filename_fasta(); 
 
 # Create expected output file name
-my $output_filename = "$input_filename.aa.fa";
+my $output_filename = remove_path_and_ext($input_filename) . '.aa.fa';
 
 system("bin/trans_cdna $input_filename");
 
@@ -34,7 +36,10 @@ sub filename_fasta {
     my $string = fasta();
     print {$fh} $string;
     close $fh;
-    return $filename;
+
+    my $fasta_filename = "$filename.fa";
+    rename($filename, $fasta_filename);
+    return $fasta_filename;
 }
 
 sub delete_temp_file {
@@ -57,4 +62,12 @@ sub fasta
 >parvalbumin-tidbit
 TCGATGACAGACTTGCTCAGCGCTTAG
 END
+}
+
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    my $basename = basename($extensionless_name);
+    return $basename;
 }

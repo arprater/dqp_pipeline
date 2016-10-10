@@ -25,7 +25,7 @@ exit_giving_usage() if grep { looks_like_flag($_) } ( $filename_n, $filename_t);
 ################################################################################
 
 # create input and output file handles
-open( my $fh_out,  '>', basename($filename_n) . '.compared_to.' . basename($filename_t) . '.txt' );
+open( my $fh_out,  '>', remove_path_and_ext($filename_n) . '.compared_to.' . remove_path_and_ext($filename_t) . '.txt' );
 say {$fh_out} "seq\tRPMn\tRPMt\tlog2(RPMt/RPMn)";
 
 my %RPM_for_n = read_RPMs_for($filename_n);
@@ -96,6 +96,13 @@ sub log2 {
     return log($n)/log(2);
 }
 
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    my $basename = basename($extensionless_name);
+    return $basename;
+}
 
 =head1 NAME
 

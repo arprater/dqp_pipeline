@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use autodie;
 
+use File::Basename;
+
 ################################################################################
 # handle command line arguments
 #------------------------------------------------------------------------------
@@ -18,9 +20,10 @@ exit_giving_usage() if looks_like_flag($filename_in);
 ################################################################################
 
 # create input and output file handles
+my $out_base = remove_path_and_ext($filename_in);
 open( my $fh_in,    '<', $filename_in              );
-open( my $fh_out,   '>', "$filename_in.count.fa" );
-open( my $fh_table, '>', "$filename_in.tab.txt" );
+open( my $fh_out,   '>', "$out_base.count.fa" );
+open( my $fh_table, '>', "$out_base.tab.txt" );
 
 my %count_for;
 
@@ -84,6 +87,13 @@ sub looks_like_flag
     return index($arg, '-') == 0;
 }
 
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    my $basename = basename($extensionless_name);
+    return $basename;
+}
 
 =head1 NAME
 

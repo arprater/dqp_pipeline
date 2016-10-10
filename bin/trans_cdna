@@ -3,6 +3,8 @@ use 5.010;
 use strict;
 use warnings;
 
+use File::Basename;
+
 =head1 NAME
 
 trans_cdna - translates a cDNA sequence
@@ -42,7 +44,7 @@ my ($format)    = shift // 'fasta';
 my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
 
 # Create output file handle
-open(my $fh_out, '>',  "$filename_in.aa.fa" );
+open(my $fh_out, '>',  remove_path_and_ext($filename_in) . '.aa.fa' );
 
 while( (my $seq = $seqin->next_seq()) ) {
     my $pseq = $seq->translate();
@@ -78,4 +80,12 @@ USAGE:
     Output file will be named the same as the input file with "aa.fa" appended to it.
 END
     exit;
+}
+
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    my $basename = basename($extensionless_name);
+    return $basename;
 }

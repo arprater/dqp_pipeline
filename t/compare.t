@@ -4,13 +4,13 @@ use warnings;
 
 use Test2::Bundle::Extended;
 
+use File::Basename;
+
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
 use File::Temp qw( tempfile ); # Function to create a temporary file
 use File::Slurp qw( slurp );
 use Carp       qw( croak    ); # Function to emit errors that blame the calling code
-
-use File::Basename;
 
 {
     # Create input file
@@ -18,7 +18,7 @@ use File::Basename;
     my $input_table_t = filename_input_t(); 
     
     # Create expected output file name
-    my $output_table = basename($input_table_n) . '.compared_to.' . basename($input_table_t) . '.txt';
+    my $output_table = remove_path_and_ext($input_table_n) . '.compared_to.' . remove_path_and_ext($input_table_t) . '.txt';
     
     system("bin/compare $input_table_n $input_table_t");
     
@@ -97,4 +97,11 @@ TCGATGACAGACTTGCTCAGCGCT	400000	400000	0
 ACAGACTTGCTCAGCGCT	200000	200000	0
 ATGACAGACTTGCTCAGCGCT	400000	200000	-1
 END
+}
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    my $basename = basename($extensionless_name);
+    return $basename;
 }

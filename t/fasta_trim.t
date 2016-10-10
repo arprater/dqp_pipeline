@@ -4,18 +4,22 @@ use warnings;
 
 use Test2::Bundle::Extended;
 
+use File::Basename;
+
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
 use File::Temp qw( tempfile ); # Function to create a temporary file
 use File::Slurp qw( slurp );
 use Carp       qw( croak    ); # Function to emit errors that blame the calling code
 
+use File::Basename;
+
 {
     # Create input file
     my $input_filename = filename_fasta(); 
     
     # Create expected output file name
-    my $output_filename = "$input_filename.trimmed.fa";
+    my $output_filename = remove_path_and_ext($input_filename) . '.trimmed.fa';
     
     system("bin/fasta_trim $input_filename ATG TAG");
     
@@ -35,7 +39,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     my $input_filename = filename_input2(); 
     
     # Create expected output file name
-    my $output_filename = "$input_filename.trimmed.fa";
+    my $output_filename = remove_path_and_ext($input_filename) . '.trimmed.fa';
     
     system("bin/fasta_trim $input_filename ATGATG TAGTAG");
     
@@ -49,6 +53,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     delete_temp_file( $input_filename);
     delete_temp_file( $output_filename);
 }
+
 done_testing();
 
 sub filename_fasta {
@@ -97,3 +102,11 @@ TCGATGACAGACTTGCTCAGCGCT
 END
 }
 
+
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    my $basename = basename($extensionless_name);
+    return $basename;
+}
