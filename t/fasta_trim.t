@@ -17,7 +17,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     # Create expected output file name
     my $output_filename = "$input_filename.trimmed.fa";
     
-    system("bin/fasta_trim $input_filename ATG UAG");
+    system("bin/fasta_trim $input_filename ATG TAG");
     
     my $expected = expected();
     
@@ -37,7 +37,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     # Create expected output file name
     my $output_filename = "$input_filename.trimmed.fa";
     
-    system("bin/fasta_trim $input_filename ATGATG UAGUAG");
+    system("bin/fasta_trim $input_filename ATGATG TAGTAG");
     
     my $expected = expected();
     
@@ -77,7 +77,7 @@ sub fasta
 {
     return <<'END';
 >parvalbumin-tidbit
-ATGTCGATGACAGACTTGCTCAGCGCTUAG
+ATGTCGATGACAGACTTGCTCAGCGCTTAG
 END
 }
 
@@ -85,7 +85,7 @@ sub input2
 {
     return <<'END';
 >parvalbumin-tidbit
-ATGATGTCGATGACAGACTTGCTCAGCGCTUAGUAG
+ATGATGTCGATGACAGACTTGCTCAGCGCTTAGTAG
 END
 }
 

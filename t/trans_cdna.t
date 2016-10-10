@@ -55,6 +55,6 @@ sub fasta
 {
     return <<'END';
 >parvalbumin-tidbit
-TCGATGACAGACTTGCTCAGCGCTUAG
+TCGATGACAGACTTGCTCAGCGCTTAG
 END
 }
