@@ -36,8 +36,8 @@ my $big_script =<<"END";
 #SBATCH -e dqp_pipeline.e_%j
 #SBATCH --time 4:00:00 
 
-#update this when pandaseq available # pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined
-#update this when pandaseq available # pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined
+pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined
+pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined
 
 fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
 fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
@@ -45,6 +45,7 @@ fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
 trans_cda $n_trimmed
 trans_cda $t_trimmed
 
+count 
 END
 
 sub exit_giving_usage 
