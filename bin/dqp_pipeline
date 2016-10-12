@@ -1,0 +1,112 @@
+#!/bin/env perl
+use 5.010;
+use strict;
+use warnings;
+
+# Capture the first command line argument as the file name
+my $n_forward_filename = shift // exit_giving_usage();
+my $n_reverse_filename = shift // exit_giving_usage();
+my $t_forward_filename = shift // exit_giving_usage();
+my $t_reverse_filename = shift // exit_giving_usage();
+my $pre_capture_oligo  = shift // exit_giving_usage();
+my $post_capture_oligo = shift // exit_giving_usage();
+
+# If there is a command flag, exit and give the usage information (because we're not using flags)
+exit_giving_usage() if grep { looks_like_flag($_) } ( $n_forward_filename, $n_reverse_filename, $t_forward_filename, $t_reverse_filename, $pre_capture_oligo, $post_capture_oligo);
+
+my $n_basename = 'n';
+my $t_basename = 't';
+
+# Determine intermediate file names
+my $n_combined = 'n.combined.fa';
+my $t_combined = 't.combined.fa';
+
+my $n_trimmed = "n.combined.fa.trimmed.fa";
+my $t_trimmed = "t.combined.fa.trimmed.fa";
+
+my $t_aa = "t.combined.fa.trimmed.fa";
+my $t_aa = "t.combined.fa.trimmed.fa";
+
+#TODO: Make sure all the bin files are in the PATH
+
+my $big_script =<<"END";
+#!/bin/bash
+#SBATCH -J dqp_pipeline
+#SBATCH -o dqp_pipeline.o_%j
+#SBATCH -e dqp_pipeline.e_%j
+#SBATCH --time 4:00:00 
+
+#update this when pandaseq available # pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined
+#update this when pandaseq available # pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined
+
+fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
+fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
+
+trans_cda $n_trimmed
+trans_cda $t_trimmed
+
+END
+
+sub exit_giving_usage 
+{
+    say <<"END";
+USAGE:
+
+Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo):
+
+    $0 n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG 
+
+"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control. 
+"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control. 
+"t_forward.fq" is the FASTQ file for the forward reads of the target selection control. 
+"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control. 
+
+Intermediate files created
+
+n.combined.fa   t.combined.fa
+n.trimmed.fa    t.trimmed.fa
+n.aa.fa         t.aa.fa
+n.count.fa      t.count.fa
+n.count.tab.txt t.count.tab.txt
+
+Output will be 
+
+n.compared_to.t.table.txt
+
+END
+
+    exit;
+}
+
+sub looks_like_flag 
+{
+    my $arg = shift;
+    return index($arg, '-') == 0;
+}
+
+=begin
+
+=SYNOPSIS
+
+Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo):
+
+    dqp_pipeline n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG 
+
+"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control. 
+"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control. 
+"t_forward.fq" is the FASTQ file for the forward reads of the target selection control. 
+"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control. 
+
+Intermediate files created
+
+n.combined.fa   t.combined.fa
+n.trimmed.fa    t.trimmed.fa
+n.aa.fa         t.aa.fa
+n.count.fa      t.count.fa
+n.count.tab.txt t.count.tab.txt
+
+Output will be 
+
+n.compared_to.t.table.txt
+
+=cut
