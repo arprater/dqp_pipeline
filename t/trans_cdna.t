@@ -7,9 +7,9 @@ use Test2::Bundle::Extended;
 use File::Basename;
 
 # Testing-related modules
-use File::Temp qw( tempfile ); # Function to create a temporary file
-use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
-use Carp       qw( croak    ); # Function to emit errors that blame the calling code
+use File::Temp   qw( tempfile ); # Function to create a temporary file
+use File::Slurp  qw( slurp    );
+use Carp         qw( croak    ); # Function to emit errors that blame the calling code
 
 # Create input file
 my $input_filename = filename_fasta(); 
@@ -22,7 +22,7 @@ system("bin/trans_cdna $input_filename");
 my $expected = expected();
 
 # Read whole file into a string
-my $result = path($output_filename)->slurp_utf8;
+my $result = slurp($output_filename);
 
 is($result, $expected, 'correctly translated cDNA');
 
