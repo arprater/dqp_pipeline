@@ -3,7 +3,6 @@ use strict;
 use warnings;
 
 use Test2::Bundle::Extended;
-use Data::Section -setup; # Set up labeled DATA sections
 
 use File::Basename;
 
@@ -45,15 +44,6 @@ sub sref_from {
     return __PACKAGE__->section_data($section);
 }
 
-sub string_from {
-    my $section = shift;
-
-    #Get the scalar reference
-    my $sref = sref_from($section);
-
-    #Return a string containing the entire section
-    return ${$sref};
-}
 
 sub fh_from {
     my $section = shift;
@@ -150,8 +140,11 @@ sub remove_path_and_ext
     return $basename;
 }
 
-__DATA__
-__[ input_fastq_forward_n ]__
+sub string_from {
+    my $section = shift;
+    if ($section eq 'input_fastq_forward_n' )
+    {
+        return <<'END_OF_SECTION';
 @A copy1
 ATGTCGATGACAGACTTGCTCAGCGCTTAG
 +
@@ -192,7 +185,11 @@ EEEEEEEEEEEEEEEEEEEEEEEE
 ATGACAGACTTGCTCAGCGCTTAG
 +
 EEEEEEEEEEEEEEEEEEEEEEEE
-__[ input_fastq_reverse_n ]__
+END_OF_SECTION
+    }
+    elsif( $section eq 'input_fastq_reverse_n')
+    {
+    return <<'END_OF_SECTION';
 @A copy1
 CTAAGCGCTGAGCAAGTCTGTCATCGACAT
 +
@@ -233,7 +230,11 @@ EEEEEEEEEEEEEEEEEEEEEEEE
 CTAAGCGCTGAGCAAGTCTGTCAT
 +
 EEEEEEEEEEEEEEEEEEEEEEEE
-__[ input_fastq_forward_t ]__
+END_OF_SECTION
+    }
+    elsif( $section eq 'input_fastq_forward_t')
+    {
+    return <<'END_OF_SECTION';
 @W copy 1
 ATGTCGATGACAGACTTGCTCAGCGCTTAG
 +
@@ -274,7 +275,11 @@ EEEEEEEEEEEEEEEEEEEEE
 ATGGACTTGCTCAGCGCTTAG
 +
 EEEEEEEEEEEEEEE
-__[ input_fastq_reverse_t ]__
+END_OF_SECTION
+    }
+    elsif( $section eq 'input_fastq_reverse_t')
+    {
+    return <<'END_OF_SECTION';
 @W copy 1
 CTAAGCGCTGAGCAAGTCTGTCATCGACAT
 +
@@ -315,3 +320,8 @@ EEEEEEEEEEEEEEEEEEEEE
 CTAAGCGCTGAGCAAGTCCAT
 +
 EEEEEEEEEEEEEEEEEEEEE
+END_OF_SECTION
+    }
+    die "section '$section' not found!";
+    return;
+}
