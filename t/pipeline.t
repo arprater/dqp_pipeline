@@ -31,7 +31,20 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     
     ok(($result eq expected() || $result eq expected_alt()), 'correctly created final compare file');
 
-    delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create");
+    my @intermediate_files = qw( 
+        n.combined.fa
+        n.combined.trimmed.aa.count.fa
+        n.combined.trimmed.aa.fa
+        n.combined.trimmed.fa
+        t.combined.fa
+        t.combined.trimmed.aa.count.fa
+        t.combined.trimmed.aa.fa
+        t.combined.trimmed.fa
+        n.combined.trimmed.aa.tab.txt
+        t.combined.trimmed.aa.tab.txt
+    );
+
+    delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create", @intermediate_files);
 
 }
 
