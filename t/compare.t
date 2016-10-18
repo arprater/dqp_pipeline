@@ -18,9 +18,9 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     my $input_table_t = filename_input_t(); 
     
     # Create expected output file name
-    my $output_table = remove_path_and_ext($input_table_n) . '.compared_to.' . remove_path_and_ext($input_table_t) . '.txt';
+    my $output_table = tempfile_name();
     
-    system("bin/compare $input_table_n $input_table_t");
+    system("bin/compare $input_table_n $input_table_t > $output_table");
     
     my $expected = expected();
     
@@ -35,6 +35,13 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 }
 
 done_testing();
+
+sub tempfile_name
+{
+    my ($fh, $filename) = tempfile();
+    close $fh;
+    return $filename;
+}
 
 sub filename_input_n {
     my ( $fh, $filename ) = tempfile();
@@ -98,6 +105,7 @@ ACAGACTTGCTCAGCGCT	200000	200000	0
 ATGACAGACTTGCTCAGCGCT	400000	200000	-1
 END
 }
+
 sub remove_path_and_ext
 {
     my $file_name = shift;

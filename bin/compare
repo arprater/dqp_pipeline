@@ -24,9 +24,8 @@ exit_giving_usage() if grep { looks_like_flag($_) } ( $filename_n, $filename_t);
 #------------------------------------------------------------------------------
 ################################################################################
 
-# create input and output file handles
-open( my $fh_out,  '>', remove_path_and_ext($filename_n) . '.compared_to.' . remove_path_and_ext($filename_t) . '.txt' );
-say {$fh_out} "seq\tRPMn\tRPMt\tlog2(RPMt/RPMn)";
+# create output file
+say "seq\tRPMn\tRPMt\tlog2(RPMt/RPMn)";
 
 my %RPM_for_n = read_RPMs_for($filename_n);
 my %RPM_for_t = read_RPMs_for($filename_t);
@@ -49,12 +48,8 @@ for my $seq (@sorted_seqs)
     # We expect some of these to be uninitialized and printing nothing is exactly what we want for them
     no warnings 'uninitialized';
 
-	say {$fh_out} join("\t", $seq, $RPM_for_n{$seq}, $RPM_for_t{$seq}, $log2_for{$seq} ); 
+	say join("\t", $seq, $RPM_for_n{$seq}, $RPM_for_t{$seq}, $log2_for{$seq} ); 
 }
-
-# Close the output file
-close($fh_out);
-
 
 sub read_RPMs_for 
 {
@@ -78,9 +73,7 @@ sub exit_giving_usage
 {
     say <<"END";
 USAGE:
-    $0 negative_count_table_filename target_count_table_filename
-
-    Output files will be named like "negative_count_table_filename.compared_to.target_count_table_filename.compare.txt"
+    $0 negative_count_table_filename target_count_table_filename > output_file_name
 END
     exit;
 }
@@ -110,7 +103,7 @@ compare - compare abundances of sequences in different samples
 
 =head1 SYNOPSIS
 
-compare E<lt> table1.txt E<gt> E<lt> table2.txt E<gt>
+compare E<lt> table1.txt E<gt> E<lt> table2.txt E<gt> > output_file_name
 
 =head1 DESCRIPTION 
 
