@@ -21,23 +21,19 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
                             filename_for('input_fastq_reverse_t'),
     );
 
-    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') );
+    my $output_file = "n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
 
-    # Create expected output file name
-    my $output_table = remove_path_and_ext($input_table_n) . '.compared_to.' . remove_path_and_ext($input_table_t) . '.txt';
+    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') . " > $output_file" );
+
+    my $expected = expected();
     
-#    system("bin/compare $input_table_n $input_table_t");
-#    
-#    my $expected = expected();
-#    
-#    # Read whole file into a string
-#    my $result = slurp $output_table;
-#    
-#    ok(($result eq expected() || $result eq expected_alt()), 'correctly created compare file');
-#    
-#    delete_temp_file( $input_table_n );
-#    delete_temp_file( $input_table_t );
-#    delete_temp_file( $output_table   );
+    # Read whole file into a string
+    my $result = slurp $output_file;
+    
+    ok(($result eq expected() || $result eq expected_alt()), 'correctly created final compare file');
+
+    delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create");
+
 }
 
 done_testing();
@@ -114,10 +110,14 @@ sub filename_input_t {
     return $filename;
 }
 
-sub delete_temp_file {
-    my $filename  = shift;
-    my $delete_ok = unlink $filename;
-    # diag( "deleted temp file '$filename'" );
+sub delete_temp_files {
+    my @filenames = @_;
+    for my $filename (@filenames)
+    {
+        my $filename  = shift;
+        my $delete_ok = unlink $filename;
+        diag( "deleted temp file '$filename'" );
+    }
 }
 
 sub expected

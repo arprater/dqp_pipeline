@@ -3,6 +3,8 @@ use 5.010;
 use strict;
 use warnings;
 
+use File::Slurp qw( write_file );
+
 # Capture the first command line argument as the file name
 my $n_forward_filename = shift // exit_giving_usage();
 my $n_reverse_filename = shift // exit_giving_usage();
@@ -14,20 +16,27 @@ my $post_capture_oligo = shift // exit_giving_usage();
 # If there is a command flag, exit and give the usage information (because we're not using flags)
 exit_giving_usage() if grep { looks_like_flag($_) } ( $n_forward_filename, $n_reverse_filename, $t_forward_filename, $t_reverse_filename, $pre_capture_oligo, $post_capture_oligo);
 
-my $n_basename = 'n';
-my $t_basename = 't';
+my $n = 'n';
+my $t = 't';
 
 # Determine intermediate file names
-my $n_combined = 'n.combined.fa';
-my $t_combined = 't.combined.fa';
+my $n_combined = "$n.combined.fa";
+my $t_combined = "$t.combined.fa";
 
-my $n_trimmed = "n.combined.fa.trimmed.fa";
-my $t_trimmed = "t.combined.fa.trimmed.fa";
+my $n_trimmed = "$n.combined.trimmed.fa";
+my $t_trimmed = "$t.combined.trimmed.fa";
 
-my $t_aa = "t.combined.fa.trimmed.fa";
-my $t_aa = "t.combined.fa.trimmed.fa";
+my $n_aa = "$n.combined.trimmed.aa.fa";
+my $t_aa = "$t.combined.trimmed.aa.fa";
 
-#TODO: Make sure all the bin files are in the PATH
+my $n_count_fa = "$n.combined.trimmed.aa.count.fa";
+my $t_count_fa = "$t.combined.trimmed.aa.count.fa";
+
+my $n_count_tab = "$n.combined.trimmed.aa.tab.txt";
+my $t_count_tab = "$t.combined.trimmed.aa.tab.txt";
+
+my $output_file = "$n.combined.trimmed.aa.tab.compared_to.$t.combined.trimmed.aa.tab.txt";
+my $run_script = "$output_file.run_to_create";
 
 my $big_script =<<"END";
 #!/bin/bash
@@ -35,18 +44,27 @@ my $big_script =<<"END";
 #SBATCH -o dqp_pipeline.o_%j
 #SBATCH -e dqp_pipeline.e_%j
 #SBATCH --time 4:00:00 
+module load 
 
 pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined
 pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined
 
-fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
-fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
+bin/fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
+bin/fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
 
-trans_cda $n_trimmed
-trans_cda $t_trimmed
+bin/trans_cdna $n_trimmed
+bin/trans_cdna $t_trimmed
 
-count 
+bin/count $n_aa
+bin/count $t_aa
+
+bin/compare $n_count_tab $t_count_tab
+
 END
+
+write_file("$run_script", $big_script);
+
+system("chmod u+x $run_script; ./$output_file.run_to_create");
 
 sub exit_giving_usage 
 {
