@@ -8,19 +8,20 @@ use File::Basename;
 
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
-use File::Temp qw( tempfile ); # Function to create a temporary file
-use File::Slurp qw( slurp );
-use Carp       qw( croak    ); # Function to emit errors that blame the calling code
+use File::Temp  qw( tempfile ); # Function to create a temporary file
+use File::Slurp qw( slurp    );
+use Carp        qw( croak    ); # Function to emit errors that blame the calling code
 
 {
     # Create input file
     my $input_filename = filename_fasta(); 
     
     # Create expected output file name
-    my $output_fasta = remove_path_and_ext($input_filename) . '.count.fa';
-    my $output_table = remove_path_and_ext($input_filename) . '.tab.txt';
+    my $out_base     = remove_path_and_ext($input_filename);
+    my $output_fasta = "$out_base.count.fa";
+    my $output_table = "$out_base.tab.txt";
     
-    system("bin/count $input_filename");
+    system("bin/count $input_filename $out_base");
     
     # Read whole file into a string
     my $result_fasta = slurp $output_fasta;

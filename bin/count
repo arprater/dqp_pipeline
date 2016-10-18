@@ -12,6 +12,7 @@ use File::Basename;
 
 # Capture the first command line argument as the file name
 my $filename_in = shift // exit_giving_usage();
+my $out_base    = shift // exit_giving_usage();
 
 # If there is a command flag, exit and give the usage information (because we're not using flags)
 exit_giving_usage() if looks_like_flag($filename_in);
@@ -20,7 +21,6 @@ exit_giving_usage() if looks_like_flag($filename_in);
 ################################################################################
 
 # create input and output file handles
-my $out_base = remove_path_and_ext($filename_in);
 open( my $fh_in,    '<', $filename_in              );
 open( my $fh_out,   '>', "$out_base.count.fa" );
 open( my $fh_table, '>', "$out_base.tab.txt" );
@@ -73,10 +73,10 @@ sub exit_giving_usage
 {
     say <<"END";
 USAGE:
-    $0 in_file_name.fa
+    $0 in_file_name.fa base
 
     Input file name can be anything.
-    Output files will be named the same as the input file with "count.fa" or "tab.txt" appended to it.
+    Output files will be named whatever is specified as "base" followed by "count.fa" or "tab.txt".
 END
     exit;
 }
