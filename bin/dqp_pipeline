@@ -3,6 +3,8 @@ use 5.010;
 use strict;
 use warnings;
 
+use FindBin qw($Bin);
+
 use File::Slurp qw( write_file );
 
 # Capture the first command line argument as the file name
@@ -49,16 +51,16 @@ module load pandaseq/pandaseq-2.10
 pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined &> $n_combined.pandaseq.log
 pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined &> $t_combined.pandaseq.log
 
-bin/fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
-bin/fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
+$Bin/fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
+$Bin/fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
 
-bin/trans_cdna $n_trimmed
-bin/trans_cdna $t_trimmed
+$Bin/trans_cdna $n_trimmed
+$Bin/trans_cdna $t_trimmed
 
-bin/count $n_aa
-bin/count $t_aa
+$Bin/count $n_aa
+$Bin/count $t_aa
 
-bin/compare $n_count_tab $t_count_tab
+$Bin/compare $n_count_tab $t_count_tab
 
 END
 
