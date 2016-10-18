@@ -21,7 +21,7 @@ use File::Basename;
     # Create expected output file name
     my $output_filename = remove_path_and_ext($input_filename) . '.trimmed.fa';
     
-    system("bin/fasta_trim $input_filename ATG TAG");
+    system("bin/fasta_trim $input_filename ATG TAG > $output_filename");
     
     my $expected = expected();
     
@@ -41,7 +41,7 @@ use File::Basename;
     # Create expected output file name
     my $output_filename = remove_path_and_ext($input_filename) . '.trimmed.fa';
     
-    system("bin/fasta_trim $input_filename ATGATG TAGTAG");
+    system("bin/fasta_trim $input_filename ATGATG TAGTAG > $output_filename");
     
     my $expected = expected();
     

@@ -24,8 +24,7 @@ exit_giving_usage() if grep { looks_like_flag($_) } ( $filename_in, $pre_capture
 ################################################################################
 
 # create input and output file handles
-open( my $fh_in,  '<', $filename_in              );
-open( my $fh_out, '>', remove_path_and_ext($filename_in) . '.trimmed.fa' );
+open( my $fh_in,  '<', $filename_in );
 
 while( my $header = readline $fh_in)
 { 
@@ -35,22 +34,18 @@ while( my $header = readline $fh_in)
     if ( $sequence =~ / $pre_capture_oligo ( .+ ) $post_capture_oligo /xms )
     {
         $sequence = $1;
-        say $fh_out $header;
-        say $fh_out $sequence;
+        say $header;
+        say $sequence;
     }
 }
 
-# Close the output file
-close($fh_out);
-
 sub exit_giving_usage 
 {
-    say <<"END";
+    warn <<"END";
 USAGE:
-    $0 in_file_name.fa pre_capture_oligo post_capture_oligo 
+    $0 in_file_name.fa pre_capture_oligo post_capture_oligo > out_file_name.fa 
 
     Input file name can be anything.
-    Output file will be named the same as the input file with "trimmed.fa" appended to it.
 
     "pre_capture_oligo" is conserved sequence right before the variable region
     "post_capture_oligo" is conserved sequence right after the variable region
