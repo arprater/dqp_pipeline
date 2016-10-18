@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test2::Bundle::Extended;
+use Test::More;
 
 use File::Basename;
 
@@ -31,7 +31,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     my $result_href   = hashref_for($result);
     my $expected_href = hashref_for( expected() );
     
-    is($result_href,$expected_href, 'correctly created final compare file');
+    is_deeply($result_href,$expected_href, 'correctly created final compare file');
 
     my @intermediate_files = qw( 
         n.combined.fa
@@ -71,7 +71,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     my $result_href   = hashref_for($result);
     my $expected_href = hashref_for( expected_with_t2() );
     
-    is($result_href, $expected_href, 'correctly created final compare file for target 2');
+    is_deeply($result_href, $expected_href, 'correctly created final compare file for target 2');
 
     my @intermediate_files = qw( 
         n.combined.fa

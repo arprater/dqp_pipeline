@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test2::Bundle::Extended;
+use Test::More;
 
 use File::Basename;
 
