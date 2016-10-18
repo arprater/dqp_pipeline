@@ -37,8 +37,8 @@ my $filename_in = shift // exit_giving_usage();
 
 exit_giving_usage() if index($filename_in, '-') == 0;
 
-# Find out the format from the second command line argument or default to FASTQ
-my ($format)    = shift // 'fasta';
+# Find out the format from the second command line argument
+my ($format)    = shift // exit_giving_usage();
 
 # input stream for sequences
 my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
@@ -73,11 +73,10 @@ sub exit_giving_usage
 {
     say <<"END";
 USAGE:
-    $0 in_file_name.fa [format]
+    $0 in_file_name.fa format > out_file_name.fa
 
-    Input format can be "fastq" (default) or "fasta".
+    Input format can be "fasta" or "fastq".
     Input file name can be anything.
-    Output file will be named the same as the input file with "aa.fa" appended to it.
 END
     exit;
 }

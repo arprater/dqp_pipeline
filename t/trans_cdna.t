@@ -17,7 +17,7 @@ my $input_filename = filename_fasta();
 # Create expected output file name
 my $output_filename = remove_path_and_ext($input_filename) . '.aa.fa';
 
-system("bin/trans_cdna $input_filename");
+system("bin/trans_cdna $input_filename fasta > $output_filename");
 
 my $expected = expected();
 
