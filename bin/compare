@@ -106,15 +106,15 @@ sub remove_path_and_ext
 
 =head1 NAME
 
-fasta_trim - translates a cDNA sequence
+compare - compare abundances of sequences in different samples 
 
 =head1 SYNOPSIS
 
-fasta_trim E<lt> filename.fa E<gt>
+compare E<lt> table1.txt E<gt> E<lt> table2.txt E<gt>
 
 =head1 DESCRIPTION 
 
-The script will trim one Fasta nucleotide file
+The script will compare abundances from two tables, one for each sample
 
 =head1 FEEDBACK
 
