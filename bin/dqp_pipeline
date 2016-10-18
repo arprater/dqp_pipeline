@@ -46,8 +46,8 @@ my $big_script =<<"END";
 #SBATCH --time 4:00:00 
 module load pandaseq/pandaseq-2.10 
 
-pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined
-pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined
+pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined &> $n_combined.pandaseq.log
+pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined &> $t_combined.pandaseq.log
 
 bin/fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
 bin/fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo

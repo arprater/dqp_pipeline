@@ -6,6 +6,8 @@ use Test2::Bundle::Extended;
 
 use File::Basename;
 
+my $DEBUG = 0; # 0 = FALSE, 1 = TRUE
+
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
 use File::Temp qw( tempfile ); # Function to create a temporary file
@@ -24,19 +26,21 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 
     system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') . " > $output_file" );
 
-    my $expected = expected();
-    
     # Read whole file into a string
-    my $result = slurp $output_file;
+    my $result        = slurp $output_file;
+    my $result_href   = hashref_for($result);
+    my $expected_href = hashref_for( expected() );
     
-    ok(($result eq expected() || $result eq expected_alt()), 'correctly created final compare file');
+    is($result_href,$expected_href, 'correctly created final compare file');
 
     my @intermediate_files = qw( 
         n.combined.fa
+        n.combined.fa.pandaseq.log
         n.combined.trimmed.aa.count.fa
         n.combined.trimmed.aa.fa
         n.combined.trimmed.fa
         t.combined.fa
+        t.combined.fa.pandaseq.log
         t.combined.trimmed.aa.count.fa
         t.combined.trimmed.aa.fa
         t.combined.trimmed.fa
@@ -45,6 +49,46 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     );
 
     delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create", @intermediate_files);
+
+
+}
+
+{
+    # Create input file
+    my @fastq_filenames = ( filename_for('input_fastq_forward_n'),
+                            filename_for('input_fastq_reverse_n'),
+                            filename_for('input_fastq_forward_t2'),
+                            filename_for('input_fastq_reverse_t2'),
+    );
+
+    my $output_file = "n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
+
+    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') . " > $output_file" );
+
+    # Read whole file into a string
+    my $result        = slurp $output_file;
+
+    my $result_href   = hashref_for($result);
+    my $expected_href = hashref_for( expected_with_t2() );
+    
+    is($result_href, $expected_href, 'correctly created final compare file for target 2');
+
+    my @intermediate_files = qw( 
+        n.combined.fa
+        n.combined.fa.pandaseq.log
+        n.combined.trimmed.aa.count.fa
+        n.combined.trimmed.aa.fa
+        n.combined.trimmed.fa
+        t.combined.fa
+        t.combined.fa.pandaseq.log
+        t.combined.trimmed.aa.count.fa
+        t.combined.trimmed.aa.fa
+        t.combined.trimmed.fa
+        n.combined.trimmed.aa.tab.txt
+        t.combined.trimmed.aa.tab.txt
+    );
+
+    delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create", @intermediate_files) unless $DEBUG;
 
 }
 
@@ -119,7 +163,7 @@ sub delete_temp_files {
     {
         my $filename  = shift;
         my $delete_ok = unlink $filename;
-        diag( "deleted temp file '$filename'" );
+        # diag( "deleted temp file '$filename'" );
     }
 }
 
@@ -134,13 +178,14 @@ MTDLLSA	400000	200000	-1
 END
 }
 
-sub expected_alt
+sub expected_with_t2
 {
     return <<"END";
 seq	RPMn	RPMt	log2(RPMt/RPMn)
-DLLSA		200000	27.5754247590989
-SMTDLLSA	400000	400000	0
+DLLSI		100000	26.5754247590989
+DLLSA		100000	26.5754247590989
 TDLLSA	200000	200000	0
+SMTDLLSA	400000	400000	0
 MTDLLSA	400000	200000	-1
 END
 }
@@ -335,6 +380,114 @@ CTAAGCGCTGAGCAAGTCCAT
 EEEEEEEEEEEEEEEEEEEEE
 END_OF_SECTION
     }
+    elsif( $section eq 'input_fastq_forward_t2')
+    {
+    return <<'END_OF_SECTION';
+@WXY:1:FLOWCELLXX:1:1:2:2 1:N:0:GGGGGG
+ATGTCGATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:4:4 1:N:0:GGGGGG
+ATGTCGATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:8:8 1:N:0:GGGGGG
+ATGTCGATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:16:16 1:N:0:GGGGGG
+ATGTCGATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:20:20 1:N:0:GGGGGG
+ATGATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:40:40 1:N:0:GGGGGG
+ATGATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:200:200 1:N:0:GGGGGG
+ATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:400:400 1:N:0:GGGGGG
+ATGACAGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:2000:2000 1:N:0:GGGGGG
+ATGGACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:20000:20000 1:N:0:GGGGGG
+ATGGACTTGCTCAGCATTTAG
++
+EEEEEEEEEEEEEEEEEEEEE
+END_OF_SECTION
+    }
+    elsif( $section eq 'input_fastq_reverse_t2')
+    {
+    return <<'END_OF_SECTION';
+@WXY:1:FLOWCELLXX:1:1:2:2 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCATCGACAT
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:4:4 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCATCGACAT
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:8:8 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCATCGACAT
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:16:16 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCATCGACAT
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:20:20 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCATCAT
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:40:40 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCATCAT
++
+EEEEEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:200:200 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCAT
++
+EEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:400:400 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCTGTCAT
++
+EEEEEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:2000:2000 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTCCAT
++
+EEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:20000:20000 2:N:0:GGGGGG
+CTAAATGCTGAGCAAGTCCAT
++
+EEEEEEEEEEEEEEEEEEEEE
+END_OF_SECTION
+    }
     die "section '$section' not found!";
     return;
+}
+
+
+sub hashref_for 
+{
+    my $string = shift;
+
+    open(my $fh, '<', \$string);
+
+    my %data_for;
+
+    while (my $line = readline $fh)
+    {
+        chomp $line;
+        my ($seq, $rest) = split /\t/, $line, 2; 
+        $data_for{$seq} = $rest;
+    }
+    return \%data_for;
 }
