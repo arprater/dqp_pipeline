@@ -44,7 +44,7 @@ my $big_script =<<"END";
 #SBATCH -o dqp_pipeline.o_%j
 #SBATCH -e dqp_pipeline.e_%j
 #SBATCH --time 4:00:00 
-module load 
+module load pandaseq/pandaseq-2.10 
 
 pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined
 pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined
@@ -82,14 +82,15 @@ Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo
 
 Intermediate files created
 
-n.combined.fa   t.combined.fa
-n.trimmed.fa    t.trimmed.fa
-n.aa.fa         t.aa.fa
-n.count.fa      t.count.fa
-n.count.tab.txt t.count.tab.txt
+n.combined.fa                       t.combined.fa
+n.combined.trimmed.fa               t.combined.trimmed.fa
+n.combined.trimmed.aa.fa            t.combined.trimmed.aa.fa
+n.combined.trimmed.aa.count.fa      t.combined.trimmed.aa.count.fa
+n.combined.trimmed.aa.count.tab.txt t.combined.trimmed.aa.count.tab.txt
 
 Output will be 
 
+n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
 n.compared_to.t.table.txt
 
 END
@@ -118,14 +119,15 @@ Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo
 
 Intermediate files created
 
-n.combined.fa   t.combined.fa
-n.trimmed.fa    t.trimmed.fa
-n.aa.fa         t.aa.fa
-n.count.fa      t.count.fa
-n.count.tab.txt t.count.tab.txt
+n.combined.fa                       t.combined.fa
+n.combined.trimmed.fa               t.combined.trimmed.fa
+n.combined.trimmed.aa.fa            t.combined.trimmed.aa.fa
+n.combined.trimmed.aa.count.fa      t.combined.trimmed.aa.count.fa
+n.combined.trimmed.aa.count.tab.txt t.combined.trimmed.aa.count.tab.txt
 
 Output will be 
 
-n.compared_to.t.table.txt
+n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
+
 
 =cut
