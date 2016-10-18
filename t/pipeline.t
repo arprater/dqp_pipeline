@@ -10,21 +10,30 @@ my $DEBUG = 0; # 0 = FALSE, 1 = TRUE
 
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
-use File::Temp qw( tempfile ); # Function to create a temporary file
+use File::Temp qw( tempfile tempdir ); # Function to create a temporary file
 use File::Slurp qw( slurp );
 use Carp       qw( croak    ); # Function to emit errors that blame the calling code
 
 {
+    # Create output directory
+    my $out_dir = tempdir(); 
+
     # Create input file
-    my @fastq_filenames = ( filename_for('input_fastq_forward_n'),
-                            filename_for('input_fastq_reverse_n'),
-                            filename_for('input_fastq_forward_t'),
-                            filename_for('input_fastq_reverse_t'),
+    my @fastq_filenames = ( (my $forward_n = filename_for($out_dir, 'input_fastq_forward_n')),
+                            (my $reverse_n = filename_for($out_dir, 'input_fastq_reverse_n')),
+                            (my $forward_t = filename_for($out_dir, 'input_fastq_forward_t')),
+                            (my $reverse_t = filename_for($out_dir, 'input_fastq_reverse_t')),
     );
 
+    # TODO: 
+    # 1. Make 7th argument output directory
+    # 2. Add --out flag (for output directory)
+    # 3. Add these flags: # --tf --tr --nf --nr --pre --post 
+    # 4. Derive intermediate file names from the original 
+    # 5. Output like V6-1.RPM (derived from file name)
     my $output_file = "n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
 
-    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') . " > $output_file" );
+    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') );
 
     # Read whole file into a string
     my $result        = slurp $output_file;
@@ -54,16 +63,19 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 }
 
 {
+    # Create output directory
+    my $out_dir = tempdir(); 
+
     # Create input file
-    my @fastq_filenames = ( filename_for('input_fastq_forward_n'),
-                            filename_for('input_fastq_reverse_n'),
-                            filename_for('input_fastq_forward_t2'),
-                            filename_for('input_fastq_reverse_t2'),
+    my @fastq_filenames = ( (my $forward_n = filename_for($out_dir, 'input_fastq_forward_n')),
+                            (my $reverse_n = filename_for($out_dir, 'input_fastq_reverse_n')),
+                            (my $forward_t = filename_for($out_dir, 'input_fastq_forward_t2')),
+                            (my $reverse_t = filename_for($out_dir, 'input_fastq_reverse_t2')),
     );
 
     my $output_file = "n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
 
-    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') . " > $output_file" );
+    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG') );
 
     # Read whole file into a string
     my $result        = slurp $output_file;
@@ -126,8 +138,9 @@ sub assign_filename_for {
 }
 
 sub filename_for {
+    my $dir               = shift;
     my $section           = shift;
-    my ( $fh, $filename ) = tempfile();
+    my ( $fh, $filename ) = tempfile( DIR => $dir );
     my $string            = string_from($section);
     print {$fh} $string;
     close $fh;
