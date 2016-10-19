@@ -3,6 +3,7 @@ use 5.010;
 use strict;
 use warnings;
 
+use File::Basename;
 use Getopt::Long;
 
 use FindBin qw($Bin);
@@ -28,8 +29,8 @@ GetOptions(
 
 
 
-my $n = 'n';
-my $t = 't';
+my $n = remove_path_and_ext($n_forward_filename);
+my $t = remove_path_and_ext($t_forward_filename);
 
 # Determine intermediate file names
 my $n_combined = "$out_dir/$n.combined.fa";
@@ -79,9 +80,21 @@ $Bin/compare $n_count_tab $t_count_tab > $output_file
 
 END
 
-write_file("$run_script", $big_script);
+write_file($run_script, $big_script);
 
 system("chmod u+x $run_script; $run_script");
+
+sub remove_path_and_ext
+{
+    my $file_name = shift;
+
+    # remove everything after the first period
+    (my $extensionless_name = $file_name) =~ s/\..*$//;
+
+    my $basename = basename($extensionless_name);
+
+    return $basename;
+}
 
 sub exit_giving_usage
 {

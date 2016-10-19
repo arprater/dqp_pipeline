@@ -8,7 +8,7 @@ use Test::More;
 
 use File::Basename;
 
-my $DEBUG = 0; # 0 = FALSE, 1 = TRUE
+my $DEBUG = 1; # 0 = FALSE, 1 = TRUE
 
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
@@ -22,20 +22,23 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 
     if ($DEBUG) { say "Temp directory is $out_dir"; }
 
+    my $n = "n_foo";
+    my $t = "t_foo";
+
     # Create input file
-    my @fastq_filenames = ( (my $forward_n = filename_for($out_dir, 'input_fastq_forward_n')),
-                            (my $reverse_n = filename_for($out_dir, 'input_fastq_reverse_n')),
-                            (my $forward_t = filename_for($out_dir, 'input_fastq_forward_t')),
-                            (my $reverse_t = filename_for($out_dir, 'input_fastq_reverse_t')),
+    my @fastq_filenames = ( (my $forward_n = assign_filename_for("$out_dir/$n.forward.fq", 'input_fastq_forward_n')),
+                            (my $reverse_n = assign_filename_for("$out_dir/$n.reverse.fq", 'input_fastq_reverse_n')),
+                            (my $forward_t = assign_filename_for("$out_dir/$t.forward.fq", 'input_fastq_forward_t')),
+                            (my $reverse_t = assign_filename_for("$out_dir/$t.reverse.fq", 'input_fastq_reverse_t')),
     );
 
     # TODO: 
     # DONE. 1. Make 7th argument output directory
     # DONE. 2. Add --out flag (for output directory)
     # DONE. 3. Add these flags: # --tf --tr --nf --nr --pre --post 
-    # 4. Derive intermediate file names from the original 
+    # DONE. 4. Derive intermediate file names from the original 
     # 5. Output like V6-1.RPM (derived from file name)
-    my $output_file = "$out_dir/n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
+    my $output_file = "$out_dir/$n.combined.trimmed.aa.tab.compared_to.$t.combined.trimmed.aa.tab.txt";
 
     system("bin/dqp_pipeline --nf=$forward_n --nr=$reverse_n --tf=$forward_t --tr=$reverse_t --out $out_dir --pre=ATG --post=TAG" );
 
@@ -47,18 +50,18 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     is_deeply($result_href,$expected_href, 'correctly created final compare file');
 
     my @intermediate_files = ( 
-        "$out_dir/n.combined.fa",
-        "$out_dir/n.combined.fa.pandaseq.log",
-        "$out_dir/n.combined.trimmed.aa.count.fa",
-        "$out_dir/n.combined.trimmed.aa.fa",
-        "$out_dir/n.combined.trimmed.fa",
-        "$out_dir/t.combined.fa",
-        "$out_dir/t.combined.fa.pandaseq.log",
-        "$out_dir/t.combined.trimmed.aa.count.fa",
-        "$out_dir/t.combined.trimmed.aa.fa",
-        "$out_dir/t.combined.trimmed.fa",
-        "$out_dir/n.combined.trimmed.aa.tab.txt",
-        "$out_dir/t.combined.trimmed.aa.tab.txt",
+        "$out_dir/$n.combined.fa",
+        "$out_dir/$n.combined.fa.pandaseq.log",
+        "$out_dir/$n.combined.trimmed.aa.count.fa",
+        "$out_dir/$n.combined.trimmed.aa.fa",
+        "$out_dir/$n.combined.trimmed.fa",
+        "$out_dir/$t.combined.fa",
+        "$out_dir/$t.combined.fa.pandaseq.log",
+        "$out_dir/$t.combined.trimmed.aa.count.fa",
+        "$out_dir/$t.combined.trimmed.aa.fa",
+        "$out_dir/$t.combined.trimmed.fa",
+        "$out_dir/$n.combined.trimmed.aa.tab.txt",
+        "$out_dir/$t.combined.trimmed.aa.tab.txt",
     );
 
     delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create", @intermediate_files);
@@ -72,14 +75,17 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 
     if ($DEBUG) { say "Temp directory is $out_dir"; }
 
+    my $n = "n_foo";
+    my $t = "t_bar";
+
     # Create input file
-    my @fastq_filenames = ( (my $forward_n = filename_for($out_dir, 'input_fastq_forward_n')),
-                            (my $reverse_n = filename_for($out_dir, 'input_fastq_reverse_n')),
-                            (my $forward_t = filename_for($out_dir, 'input_fastq_forward_t2')),
-                            (my $reverse_t = filename_for($out_dir, 'input_fastq_reverse_t2')),
+    my @fastq_filenames = ( (my $forward_n = assign_filename_for("$out_dir/$n.forward.fq", 'input_fastq_forward_n')),
+                            (my $reverse_n = assign_filename_for("$out_dir/$n.reverse.fq", 'input_fastq_reverse_n')),
+                            (my $forward_t = assign_filename_for("$out_dir/$t.forward.fq", 'input_fastq_forward_t2')),
+                            (my $reverse_t = assign_filename_for("$out_dir/$t.reverse.fq", 'input_fastq_reverse_t2')),
     );
 
-    my $output_file = "$out_dir/n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
+    my $output_file = "$out_dir/$n.combined.trimmed.aa.tab.compared_to.$t.combined.trimmed.aa.tab.txt";
 
     system("bin/dqp_pipeline --nf=$forward_n --nr=$reverse_n --tf=$forward_t --tr=$reverse_t --out $out_dir --pre=ATG --post=TAG" );
 
@@ -90,19 +96,19 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     
     is_deeply($result_href, $expected_href, 'correctly created final compare file for target 2');
 
-    my @intermediate_files = map {"$out_dir/$_"} qw( 
-        n.combined.fa
-        n.combined.fa.pandaseq.log
-        n.combined.trimmed.aa.count.fa
-        n.combined.trimmed.aa.fa
-        n.combined.trimmed.fa
-        t.combined.fa
-        t.combined.fa.pandaseq.log
-        t.combined.trimmed.aa.count.fa
-        t.combined.trimmed.aa.fa
-        t.combined.trimmed.fa
-        n.combined.trimmed.aa.tab.txt
-        t.combined.trimmed.aa.tab.txt
+    my @intermediate_files = ( 
+        "$out_dir/$n.combined.fa",
+        "$out_dir/$n.combined.fa.pandaseq.log",
+        "$out_dir/$n.combined.trimmed.aa.count.fa",
+        "$out_dir/$n.combined.trimmed.aa.fa",
+        "$out_dir/$n.combined.trimmed.fa",
+        "$out_dir/$t.combined.fa",
+        "$out_dir/$t.combined.fa.pandaseq.log",
+        "$out_dir/$t.combined.trimmed.aa.count.fa",
+        "$out_dir/$t.combined.trimmed.aa.fa",
+        "$out_dir/$t.combined.trimmed.fa",
+        "$out_dir/$n.combined.trimmed.aa.tab.txt",
+        "$out_dir/$t.combined.trimmed.aa.tab.txt",
     );
 
     delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create", @intermediate_files) unless $DEBUG;
@@ -138,7 +144,7 @@ sub assign_filename_for {
     open(my $fh, '>', $filename);
     print {$fh} $string;
     close $fh;
-    return;
+    return $filename;
 }
 
 sub filename_for {
