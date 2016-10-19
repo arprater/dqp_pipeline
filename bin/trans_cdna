@@ -43,9 +43,6 @@ my ($format)    = shift // exit_giving_usage();
 # input stream for sequences
 my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
 
-# Create output file handle
-open(my $fh_out, '>',  remove_path_and_ext($filename_in) . '.aa.fa' );
-
 while( (my $seq = $seqin->next_seq()) ) {
     my $pseq = $seq->translate();
     my $just_aa = $pseq->seq();
@@ -63,11 +60,8 @@ while( (my $seq = $seqin->next_seq()) ) {
     }
 
     # write out the translated sequence
-    print {$fh_out} ">", $seq->id(), "\n", $just_aa, "\n";
+    print ">", $seq->id(), "\n", $just_aa, "\n";
 }
-
-# Close the output file
-close($fh_out);
 
 sub exit_giving_usage 
 {

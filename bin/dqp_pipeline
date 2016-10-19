@@ -14,6 +14,7 @@ my $t_forward_filename = shift // exit_giving_usage();
 my $t_reverse_filename = shift // exit_giving_usage();
 my $pre_capture_oligo  = shift // exit_giving_usage();
 my $post_capture_oligo = shift // exit_giving_usage();
+my $out_dir            = shift // exit_giving_usage();
 
 # If there is a command flag, exit and give the usage information (because we're not using flags)
 exit_giving_usage() if grep { looks_like_flag($_) } ( $n_forward_filename, $n_reverse_filename, $t_forward_filename, $t_reverse_filename, $pre_capture_oligo, $post_capture_oligo);
@@ -22,22 +23,24 @@ my $n = 'n';
 my $t = 't';
 
 # Determine intermediate file names
-my $n_combined = "$n.combined.fa";
-my $t_combined = "$t.combined.fa";
+my $n_combined = "$out_dir/$n.combined.fa";
+my $t_combined = "$out_dir/$t.combined.fa";
 
-my $n_trimmed = "$n.combined.trimmed.fa";
-my $t_trimmed = "$t.combined.trimmed.fa";
+my $n_trimmed = "$out_dir/$n.combined.trimmed.fa";
+my $t_trimmed = "$out_dir/$t.combined.trimmed.fa";
 
-my $n_aa = "$n.combined.trimmed.aa.fa";
-my $t_aa = "$t.combined.trimmed.aa.fa";
+my $n_aa = "$out_dir/$n.combined.trimmed.aa.fa";
+my $t_aa = "$out_dir/$t.combined.trimmed.aa.fa";
 
-my $n_count_fa = "$n.combined.trimmed.aa.count.fa";
-my $t_count_fa = "$t.combined.trimmed.aa.count.fa";
+my $n_count_fa = "$out_dir/$n.combined.trimmed.aa.count.fa";
+my $t_count_fa = "$out_dir/$t.combined.trimmed.aa.count.fa";
 
-my $n_count_tab = "$n.combined.trimmed.aa.tab.txt";
-my $t_count_tab = "$t.combined.trimmed.aa.tab.txt";
+my $n_count_base = "$out_dir/$n.combined.trimmed.aa";
+my $n_count_tab = "$out_dir/$n.combined.trimmed.aa.tab.txt";
+my $t_count_base = "$out_dir/$t.combined.trimmed.aa";
+my $t_count_tab = "$out_dir/$t.combined.trimmed.aa.tab.txt";
 
-my $output_file = "$n.combined.trimmed.aa.tab.compared_to.$t.combined.trimmed.aa.tab.txt";
+my $output_file = "$out_dir/$n.combined.trimmed.aa.tab.compared_to.$t.combined.trimmed.aa.tab.txt";
 my $run_script = "$output_file.run_to_create";
 
 my $big_script =<<"END";
@@ -45,42 +48,45 @@ my $big_script =<<"END";
 #SBATCH -J dqp_pipeline
 #SBATCH -o dqp_pipeline.o_%j
 #SBATCH -e dqp_pipeline.e_%j
-#SBATCH --time 4:00:00 
-module load pandaseq/pandaseq-2.10 
+#SBATCH --time 2:00:00
+
+# Something like the following may be necessary depending on how you have Pandaseq installed on your system
+# (commented out by default)
+#module load pandaseq/pandaseq-2.10
 
 pandaseq -f $n_forward_filename -r $n_reverse_filename -w $n_combined &> $n_combined.pandaseq.log
 pandaseq -f $t_forward_filename -r $t_reverse_filename -w $t_combined &> $t_combined.pandaseq.log
 
-$Bin/fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo
-$Bin/fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo
+$Bin/fasta_trim $n_combined $pre_capture_oligo $post_capture_oligo > $n_trimmed
+$Bin/fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo > $t_trimmed
 
-$Bin/trans_cdna $n_trimmed
-$Bin/trans_cdna $t_trimmed
+$Bin/trans_cdna $n_trimmed fasta > $n_aa
+$Bin/trans_cdna $t_trimmed fasta > $t_aa
 
-$Bin/count $n_aa
-$Bin/count $t_aa
+$Bin/count $n_aa $n_count_base            
+$Bin/count $t_aa $t_count_base
 
-$Bin/compare $n_count_tab $t_count_tab
+$Bin/compare $n_count_tab $t_count_tab > $output_file
 
 END
 
 write_file("$run_script", $big_script);
 
-system("chmod u+x $run_script; ./$output_file.run_to_create");
+system("chmod u+x $run_script; $run_script");
 
-sub exit_giving_usage 
+sub exit_giving_usage
 {
     say <<"END";
 USAGE:
 
 Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo):
 
-    $0 n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG 
+    $0 n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG
 
-"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control. 
-"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control. 
-"t_forward.fq" is the FASTQ file for the forward reads of the target selection control. 
-"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control. 
+"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control.
+"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control.
+"t_forward.fq" is the FASTQ file for the forward reads of the target selection control.
+"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control.
 
 Intermediate files created
 
@@ -90,7 +96,7 @@ n.combined.trimmed.aa.fa            t.combined.trimmed.aa.fa
 n.combined.trimmed.aa.count.fa      t.combined.trimmed.aa.count.fa
 n.combined.trimmed.aa.count.tab.txt t.combined.trimmed.aa.count.tab.txt
 
-Output will be 
+Output will be
 
 n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
 n.compared_to.t.table.txt
@@ -100,7 +106,7 @@ END
     exit;
 }
 
-sub looks_like_flag 
+sub looks_like_flag
 {
     my $arg = shift;
     return index($arg, '-') == 0;
@@ -112,12 +118,12 @@ sub looks_like_flag
 
 Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo):
 
-    dqp_pipeline n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG 
+    dqp_pipeline n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG out_dir
 
-"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control. 
-"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control. 
-"t_forward.fq" is the FASTQ file for the forward reads of the target selection control. 
-"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control. 
+"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control.
+"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control.
+"t_forward.fq" is the FASTQ file for the forward reads of the target selection control.
+"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control.
 
 Intermediate files created
 
@@ -127,7 +133,7 @@ n.combined.trimmed.aa.fa            t.combined.trimmed.aa.fa
 n.combined.trimmed.aa.count.fa      t.combined.trimmed.aa.count.fa
 n.combined.trimmed.aa.count.tab.txt t.combined.trimmed.aa.count.tab.txt
 
-Output will be 
+Output will be
 
 n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
 
