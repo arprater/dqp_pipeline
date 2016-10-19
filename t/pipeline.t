@@ -30,14 +30,14 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     );
 
     # TODO: 
-    # 1. Make 7th argument output directory
-    # 2. Add --out flag (for output directory)
-    # 3. Add these flags: # --tf --tr --nf --nr --pre --post 
+    # DONE. 1. Make 7th argument output directory
+    # DONE. 2. Add --out flag (for output directory)
+    # DONE. 3. Add these flags: # --tf --tr --nf --nr --pre --post 
     # 4. Derive intermediate file names from the original 
     # 5. Output like V6-1.RPM (derived from file name)
     my $output_file = "$out_dir/n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
 
-    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG', $out_dir) );
+    system("bin/dqp_pipeline --nf=$forward_n --nr=$reverse_n --tf=$forward_t --tr=$reverse_t --out $out_dir --pre=ATG --post=TAG" );
 
     # Read whole file into a string
     my $result        = slurp $output_file;
@@ -81,7 +81,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 
     my $output_file = "$out_dir/n.combined.trimmed.aa.tab.compared_to.t.combined.trimmed.aa.tab.txt";
 
-    system("bin/dqp_pipeline " . join(" ", @fastq_filenames, 'ATG', 'TAG', $out_dir) );
+    system("bin/dqp_pipeline --nf=$forward_n --nr=$reverse_n --tf=$forward_t --tr=$reverse_t --out $out_dir --pre=ATG --post=TAG" );
 
     # Read whole file into a string
     my $result        = slurp $output_file;

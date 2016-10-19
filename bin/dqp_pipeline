@@ -3,21 +3,30 @@ use 5.010;
 use strict;
 use warnings;
 
+use Getopt::Long;
+
 use FindBin qw($Bin);
 
 use File::Slurp qw( write_file );
 
-# Capture the first command line argument as the file name
-my $n_forward_filename = shift // exit_giving_usage();
-my $n_reverse_filename = shift // exit_giving_usage();
-my $t_forward_filename = shift // exit_giving_usage();
-my $t_reverse_filename = shift // exit_giving_usage();
-my $pre_capture_oligo  = shift // exit_giving_usage();
-my $post_capture_oligo = shift // exit_giving_usage();
-my $out_dir            = shift // exit_giving_usage();
+my $out_dir = '';
+my $n_forward_filename = '';
+my $n_reverse_filename = '';
+my $t_forward_filename = '';
+my $t_reverse_filename = '';
+my $pre_capture_oligo  = '';
+my $post_capture_oligo = '';
+GetOptions(
+    "nf=s"   => \$n_forward_filename,
+    "nr=s"   => \$n_reverse_filename,
+    "tf=s"   => \$t_forward_filename,
+    "tr=s"   => \$t_reverse_filename,
+    "pre=s"  => \$pre_capture_oligo,
+    "post=s" => \$post_capture_oligo,
+    "out=s"  => \$out_dir,
+);
 
-# If there is a command flag, exit and give the usage information (because we're not using flags)
-exit_giving_usage() if grep { looks_like_flag($_) } ( $n_forward_filename, $n_reverse_filename, $t_forward_filename, $t_reverse_filename, $pre_capture_oligo, $post_capture_oligo);
+
 
 my $n = 'n';
 my $t = 't';
