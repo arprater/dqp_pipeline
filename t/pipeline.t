@@ -8,7 +8,7 @@ use Test::More;
 
 use File::Basename;
 
-my $DEBUG = 1; # 0 = FALSE, 1 = TRUE
+my $DEBUG = 0; # 0 = FALSE, 1 = TRUE
 
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
@@ -23,7 +23,7 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
     if ($DEBUG) { say "Temp directory is $out_dir"; }
 
     my $n = "n_foo";
-    my $t = "t_foo";
+    my $t = "t_bar";
 
     # Create input file
     my @fastq_filenames = ( (my $forward_n = assign_filename_for("$out_dir/$n.forward.fq", 'input_fastq_forward_n')),
@@ -32,12 +32,6 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
                             (my $reverse_t = assign_filename_for("$out_dir/$t.reverse.fq", 'input_fastq_reverse_t')),
     );
 
-    # TODO: 
-    # DONE. 1. Make 7th argument output directory
-    # DONE. 2. Add --out flag (for output directory)
-    # DONE. 3. Add these flags: # --tf --tr --nf --nr --pre --post 
-    # DONE. 4. Derive intermediate file names from the original 
-    # 5. Output like V6-1.RPM (derived from file name)
     my $output_file = "$out_dir/$n.combined.trimmed.aa.tab.compared_to.$t.combined.trimmed.aa.tab.txt";
 
     system("bin/dqp_pipeline --nf=$forward_n --nr=$reverse_n --tf=$forward_t --tr=$reverse_t --out $out_dir --pre=ATG --post=TAG" );
@@ -193,7 +187,7 @@ sub delete_temp_files {
 sub expected
 {
     return <<"END";
-seq	RPMn	RPMt	log2(RPMt/RPMn)
+seq	n_foo.RPM	t_bar.RPM	log2(t_bar.RPM/n_foo.RPM)
 DLLSA		200000	27.5754247590989
 TDLLSA	200000	200000	0
 SMTDLLSA	400000	400000	0
@@ -204,7 +198,7 @@ END
 sub expected_with_t2
 {
     return <<"END";
-seq	RPMn	RPMt	log2(RPMt/RPMn)
+seq	n_foo.RPM	t_bar.RPM	log2(t_bar.RPM/n_foo.RPM)
 DLLSI		100000	26.5754247590989
 DLLSA		100000	26.5754247590989
 TDLLSA	200000	200000	0

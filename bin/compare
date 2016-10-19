@@ -24,8 +24,11 @@ exit_giving_usage() if grep { looks_like_flag($_) } ( $filename_n, $filename_t);
 #------------------------------------------------------------------------------
 ################################################################################
 
+my $base_n_name = remove_path_and_ext($filename_n); 
+my $base_t_name = remove_path_and_ext($filename_t); 
+
 # create output file
-say "seq\tRPMn\tRPMt\tlog2(RPMt/RPMn)";
+say "seq\t$base_n_name.RPM\t$base_t_name.RPM\tlog2($base_t_name.RPM/$base_n_name.RPM)";
 
 my %RPM_for_n = read_RPMs_for($filename_n);
 my %RPM_for_t = read_RPMs_for($filename_t);
@@ -92,7 +95,7 @@ sub log2 {
 sub remove_path_and_ext
 {
     my $file_name = shift;
-    (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
+    (my $extensionless_name = $file_name) =~ s/\..*$//;
     my $basename = basename($extensionless_name);
     return $basename;
 }

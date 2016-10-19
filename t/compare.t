@@ -8,30 +8,31 @@ use File::Basename;
 
 # Testing-related modules
 # use Path::Tiny qw( path     ); # path's method slurp_utf8 reads a file into a string
-use File::Temp qw( tempfile ); # Function to create a temporary file
-use File::Slurp qw( slurp );
-use Carp       qw( croak    ); # Function to emit errors that blame the calling code
+use File::Temp  qw( tempfile tempdir ); # Functions to create temporary file/dir
+use File::Slurp qw( slurp write_file );
+use Carp        qw( croak ); # Function to emit errors that blame the calling code
 
 {
     # Create input file
-    my $input_table_n = filename_input_n(); 
-    my $input_table_t = filename_input_t(); 
+    my $input_table_n = assign_filename_input_n('foo.table.txt'); 
+    my $input_table_t = assign_filename_input_t('bar.table.txt'); 
     
     # Create expected output file name
     my $output_table = tempfile_name();
     
     system("bin/compare $input_table_n $input_table_t > $output_table");
     
-    my $expected = expected();
+    my $expected_href = hashref_for(expected());
     
     # Read whole file into a string
     my $result = slurp $output_table;
+    my $result_href = hashref_for( $result);
     
-    ok(($result eq expected() || $result eq expected_alt()), 'correctly created compare file');
+    is_deeply($result_href, $expected_href, 'correctly created compare file');
     
     delete_temp_file( $input_table_n );
     delete_temp_file( $input_table_t );
-    delete_temp_file( $output_table   );
+    delete_temp_file( $output_table  );
 }
 
 done_testing();
@@ -43,20 +44,22 @@ sub tempfile_name
     return $filename;
 }
 
-sub filename_input_n {
-    my ( $fh, $filename ) = tempfile();
+sub assign_filename_input_n {
+    my $filename = shift;
+    my $dir = tempdir();
     my $string = input_table_n();
-    print {$fh} $string;
-    close $fh;
-    return $filename;
+    my $full_filename = "$dir/$filename";
+    write_file($full_filename, $string);
+    return $full_filename;
 }
 
-sub filename_input_t {
-    my ( $fh, $filename ) = tempfile();
+sub assign_filename_input_t {
+    my $filename = shift;
+    my $dir = tempdir();
     my $string = input_table_t();
-    print {$fh} $string;
-    close $fh;
-    return $filename;
+    my $full_filename = "$dir/$filename";
+    write_file($full_filename, $string);
+    return $full_filename;
 }
 
 sub delete_temp_file {
@@ -87,21 +90,10 @@ END
 sub expected
 {
     return <<"END";
-seq	RPMn	RPMt	log2(RPMt/RPMn)
+seq	foo.RPM	bar.RPM	log2(bar.RPM/foo.RPM)
 GACTTGCTCAGCGCT		200000	27.5754247590989
 ACAGACTTGCTCAGCGCT	200000	200000	0
 TCGATGACAGACTTGCTCAGCGCT	400000	400000	0
-ATGACAGACTTGCTCAGCGCT	400000	200000	-1
-END
-}
-
-sub expected_alt
-{
-    return <<"END";
-seq	RPMn	RPMt	log2(RPMt/RPMn)
-GACTTGCTCAGCGCT		200000	27.5754247590989
-TCGATGACAGACTTGCTCAGCGCT	400000	400000	0
-ACAGACTTGCTCAGCGCT	200000	200000	0
 ATGACAGACTTGCTCAGCGCT	400000	200000	-1
 END
 }
@@ -112,4 +104,21 @@ sub remove_path_and_ext
     (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
     my $basename = basename($extensionless_name);
     return $basename;
+}
+
+sub hashref_for 
+{
+    my $string = shift;
+
+    open(my $fh, '<', \$string);
+
+    my %data_for;
+
+    while (my $line = readline $fh)
+    {
+        chomp $line;
+        my ($seq, $rest) = split /\t/, $line, 2; 
+        $data_for{$seq} = $rest;
+    }
+    return \%data_for;
 }
