@@ -4,4 +4,4 @@ Pipeline for dqp project
 
 # Dependencies
 
-This requires that pandaseq already be installed
+This requires that pandaseq already be installed and be in $PATH.
