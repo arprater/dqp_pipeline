@@ -7,15 +7,15 @@ use File::Basename;
 
 =head1 NAME
 
-trans_cdna - translates a cDNA sequence
+trans_cdna - translate cDNA sequences, up to but not including stop codons
 
 =head1 SYNOPSIS
 
-trans_cdna E<lt> cdna_cds.fa E<gt> protein.fa
+trans_cdna cdna_cds.fa fasta > protein.fa
 
 =head1 DESCRIPTION 
 
-The script will translate one cDNA Fasta file to a protein Fasta file
+The script will translate one cDNA FASTA file to a protein Fasta file
 
 =head1 FEEDBACK
 
@@ -25,8 +25,8 @@ Report bugs via GitHub (https://github.com/MU-IRCF/dqp_pipeline/issues).
 
 =head1 AUTHORS
 
+  Christopher Bottoms (adapted to remove any sequence starting at the "stop" codon, if applicable.)
   Ewan Birney (original script was called "translate_seq")
-  Christopher Bottoms (adapted to work with explicit input and output file names)
 
 =cut
 
@@ -44,7 +44,7 @@ my ($format)    = shift // exit_giving_usage();
 my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
 
 while( (my $seq = $seqin->next_seq()) ) {
-    my $pseq = $seq->translate();
+    my $pseq    = $seq->translate();
     my $just_aa = $pseq->seq();
 
     # Find stop codon, if any
