@@ -15,29 +15,20 @@ Pipeline for dqp project
 
     Besides the intermediate files 
 
-=SYNOPSIS
-
-
-
-
-
-Output will be
-
-n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
-
+# SYNOPSIS
 
 Example use of pipeline:
 
     dqp_pipeline --nf=n.forward_reads.fastq.gz --nr=n.reverse_reads.fastq.gz --tf=t.forward_reads.fastq.gz --tr=t.reverse_reads_fastq.gz --out=out.dir --pre=AAACCCATG --post=GGGTTTTAG
 
-This would create the following intermediate files in the directory `out.dir`:
+# Intermediate files created in the specified directory (named as for this example)
 
-FASTA nucleotide files containing the sequence of the forward and reverse reads of the same fragment combined:
+FASTA nucleotide files containing the sequence of the forward and reverse reads of the same fragment combined (using pandaseq with its defaults):
 
     n.combined.fa
     t.combined.fa
 
-FASTA nucelotide files containing the sequence between the "pre" and "post" sequences 
+FASTA nucelotide files containing the nucleotide sequence between the "pre" and "post" sequences (nonmatching sequences are currently ignored) 
 
     n.combined.trimmed.fa
     t.combined.trimmed.fa
@@ -47,7 +38,7 @@ FASTA protein files containing the translation of the "trimmed" files
     n.combined.trimmed.aa.fa
     t.combined.trimmed.aa.fa
 
-The FASTA protein files made nonredundant, counts of each sequence (and RPMs) are included in the file name.
+The FASTA protein files made nonredundant, counts of each sequence, and reads per million (RPMs) are included in the sequence identifier.
 
     n.combined.trimmed.aa.count.fa
     t.combined.trimmed.aa.count.fa
@@ -57,8 +48,9 @@ Tabular version of the nonredundant FASTA protein files
     n.combined.trimmed.aa.count.tab.txt
     t.combined.trimmed.aa.count.tab.txt
 
+# Final output (named as for this example)
 
-The final output is a table containing a comparison of the original two files:
+The final output is a table containing a comparison of the original two files. For cases in which one or the other sample lacked reads, an RPM of 0.001 is used in calculating log (RPMt/RPMn) where RPMt is the RPM of the sequence from the target sample and RMPn is the RPM of the sequence from the "negative" sample. In this case, the name of this table would be 
 
     n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
 
