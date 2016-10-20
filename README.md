@@ -54,12 +54,17 @@ The final output is a table containing a comparison of the original two files. F
 
     n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
 
+# Assumptions
+
+No reading frames are checked. Forward reads are assumed to be the same strand as the original mRNA. The "pre" and "post" matching sequences establish the reading frame.
+
+Any assumptions of PandaSeq run with its defaults apply (see https://github.com/neufeld/pandaseq and/or http://neufeldserver.uwaterloo.ca/%7Eapmasell/pandaseq_man1.html);
 
 # Dependencies
 
 BioPerl
 
-This requires that pandaseq already be installed and be in $PATH.
+This requires that PandaSeq already be installed and be in $PATH.
 
 This currently requires paired-end reads (but processing of single-end reads could easily be implemented)
 
