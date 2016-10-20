@@ -55,10 +55,6 @@ my $run_script = "$output_file.run_to_create";
 
 my $big_script =<<"END";
 #!/bin/bash
-#SBATCH -J dqp_pipeline
-#SBATCH -o dqp_pipeline.o_%j
-#SBATCH -e dqp_pipeline.e_%j
-#SBATCH --time 2:00:00
 
 # Something like the following may be necessary depending on how you have Pandaseq installed on your system
 # (commented out by default)

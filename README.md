@@ -60,6 +60,8 @@ No reading frames are checked. Forward reads are assumed to be the same strand a
 
 Any assumptions of PandaSeq run with its defaults apply (see https://github.com/neufeld/pandaseq and/or http://neufeldserver.uwaterloo.ca/%7Eapmasell/pandaseq_man1.html);
 
+Tested on CentOS 7. Expected to work on \*nix systems. Not expected to run on Windows.
+
 # Dependencies
 
 BioPerl
