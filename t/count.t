@@ -26,9 +26,12 @@ use Carp        qw( croak    ); # Function to emit errors that blame the calling
     # Read whole file into a string
     my $result_fasta = slurp $output_fasta;
     my $result_table = slurp $output_table;
+    my $result_fasta_href = hashref_for($result_fasta);
+    my $result_table_href = hashref_for($result_table);
+    my $expected_fasta_href = hashref_for(expected_fasta());
+    my $expected_table_href = hashref_for(expected_table());
     
-    ok(($result_fasta eq expected_fasta() ) || ($result_fasta eq expected_fasta_alt() ), 'correctly created counted FASTA file');
-    ok(($result_table eq expected_table() ) || ($result_table eq expected_table_alt() ), 'correctly created counted table file');
+    is_deeply($result_table_href, $expected_table_href, 'correctly created counted table file');
     
     delete_temp_file( $input_filename );
     delete_temp_file( $output_fasta   );
@@ -66,35 +69,35 @@ sub fasta
 TCGATGACAGACTTGCTCAGCGCT
 >parvalbumin-tidbit
 TCGATGACAGACTTGCTCAGCGCT
+>parvalbumin-tidbit
+TCGATGACAGACTTGCTCAGCGCT
+>parvalbumin-tidbit
+TCGATGACAGACTTGCTCAGCGCT
+>foo
+ATGACAGACTTGCTCAGCGCT
+>foo
+ATGACAGACTTGCTCAGCGCT
 >foo
 ATGACAGACTTGCTCAGCGCT
 >foo
 ATGACAGACTTGCTCAGCGCT
 >bar
 ACAGACTTGCTCAGCGCT
+>bar
+ACAGACTTGCTCAGCGCT
+>baz
+GGGGGGGGGGGGGGGGGG
 END
 }
 
 sub expected_fasta
 {
     return <<'END';
->TCGATGACAGACTTGCTCAGCGCT-1-2-400000
+>TCGATGACAGACTTGCTCAGCGCT-1-4-400000
 TCGATGACAGACTTGCTCAGCGCT
->ATGACAGACTTGCTCAGCGCT-1-2-400000
+>ATGACAGACTTGCTCAGCGCT-1-4-400000
 ATGACAGACTTGCTCAGCGCT
->ACAGACTTGCTCAGCGCT-2-1-200000
-ACAGACTTGCTCAGCGCT
-END
-}
-
-sub expected_fasta_alt
-{
-    return <<'END';
->ATGACAGACTTGCTCAGCGCT-1-2-400000
-ATGACAGACTTGCTCAGCGCT
->TCGATGACAGACTTGCTCAGCGCT-1-2-400000
-TCGATGACAGACTTGCTCAGCGCT
->ACAGACTTGCTCAGCGCT-2-1-200000
+>ACAGACTTGCTCAGCGCT-2-2-200000
 ACAGACTTGCTCAGCGCT
 END
 }
@@ -102,20 +105,12 @@ END
 sub expected_table
 {
     return <<"END";
-TCGATGACAGACTTGCTCAGCGCT\t1\t2\t400000
-ATGACAGACTTGCTCAGCGCT\t1\t2\t400000
-ACAGACTTGCTCAGCGCT\t2\t1\t200000
+TCGATGACAGACTTGCTCAGCGCT\t1\t4\t400000
+ATGACAGACTTGCTCAGCGCT\t1\t4\t400000
+ACAGACTTGCTCAGCGCT\t2\t2\t200000
 END
 }
 
-sub expected_table_alt
-{
-    return <<"END";
-ATGACAGACTTGCTCAGCGCT\t1\t2\t400000
-TCGATGACAGACTTGCTCAGCGCT\t1\t2\t400000
-ACAGACTTGCTCAGCGCT\t2\t1\t200000
-END
-}
 
 sub remove_path_and_ext
 {
@@ -123,4 +118,21 @@ sub remove_path_and_ext
     (my $extensionless_name = $file_name) =~ s/\.[^.]+$//;
     my $basename = basename($extensionless_name);
     return $basename;
+}
+
+sub hashref_for 
+{
+    my $string = shift;
+
+    open(my $fh, '<', \$string);
+
+    my %data_for;
+
+    while (my $line = readline $fh)
+    {
+        chomp $line;
+        my ($seq, $rest) = split /\t/, $line, 2; 
+        $data_for{$seq} = $rest;
+    }
+    return \%data_for;
 }

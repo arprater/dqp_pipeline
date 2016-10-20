@@ -6,6 +6,8 @@ use autodie;
 
 use File::Basename;
 
+my $DEFAULT_MIN_COUNT = 2;
+
 ################################################################################
 # handle command line arguments
 #------------------------------------------------------------------------------
@@ -13,6 +15,7 @@ use File::Basename;
 # Capture the first command line argument as the file name
 my $filename_in = shift // exit_giving_usage();
 my $out_base    = shift // exit_giving_usage();
+my $min_count   = shift // $DEFAULT_MIN_COUNT;
 
 # If there is a command flag, exit and give the usage information (because we're not using flags)
 exit_giving_usage() if looks_like_flag($filename_in);
@@ -38,8 +41,19 @@ while( my $header = readline $fh_in)
     $total_sequence_count +=1;
 }
 
-my @sorted_sequences = sort { $count_for{$b} <=> $count_for{$a} } keys %count_for;
+for my $sequence (keys %count_for)
+{
+    # Ignore any sequences below the minimum (because we think they're errors)
+    if ($count_for{$sequence} < $min_count)
+    {
+        delete $count_for{$sequence};
 
+        # decrement total
+        $total_sequence_count--;
+    }
+}
+
+my @sorted_sequences = sort { $count_for{$b} <=> $count_for{$a} } keys %count_for;
 
 my $last_count = 999_999_999_999_999_999_999_999_999_999_999; # Effectively infinite read counts (as of 2016)
 

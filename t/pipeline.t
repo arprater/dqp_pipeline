@@ -63,51 +63,6 @@ use Carp       qw( croak    ); # Function to emit errors that blame the calling 
 
 }
 
-{
-    # Create output directory
-    my $out_dir = tempdir(); 
-
-    if ($DEBUG) { say "Temp directory is $out_dir"; }
-
-    my $n = "n_foo";
-    my $t = "t_bar";
-
-    # Create input file
-    my @fastq_filenames = ( (my $forward_n = assign_filename_for("$out_dir/$n.forward.fq", 'input_fastq_forward_n')),
-                            (my $reverse_n = assign_filename_for("$out_dir/$n.reverse.fq", 'input_fastq_reverse_n')),
-                            (my $forward_t = assign_filename_for("$out_dir/$t.forward.fq", 'input_fastq_forward_t2')),
-                            (my $reverse_t = assign_filename_for("$out_dir/$t.reverse.fq", 'input_fastq_reverse_t2')),
-    );
-
-    my $output_file = "$out_dir/$n.combined.trimmed.aa.tab.compared_to.$t.combined.trimmed.aa.tab.txt";
-
-    system("bin/dqp_pipeline --nf=$forward_n --nr=$reverse_n --tf=$forward_t --tr=$reverse_t --out $out_dir --pre=ATG --post=TAG" );
-
-    # Read whole file into a string
-    my $result        = slurp $output_file;
-    my $result_href   = hashref_for($result);
-    my $expected_href = hashref_for( expected_with_t2() );
-    
-    is_deeply($result_href, $expected_href, 'correctly created final compare file for target 2');
-
-    my @intermediate_files = ( 
-        "$out_dir/$n.combined.fa",
-        "$out_dir/$n.combined.fa.pandaseq.log",
-        "$out_dir/$n.combined.trimmed.aa.count.fa",
-        "$out_dir/$n.combined.trimmed.aa.fa",
-        "$out_dir/$n.combined.trimmed.fa",
-        "$out_dir/$t.combined.fa",
-        "$out_dir/$t.combined.fa.pandaseq.log",
-        "$out_dir/$t.combined.trimmed.aa.count.fa",
-        "$out_dir/$t.combined.trimmed.aa.fa",
-        "$out_dir/$t.combined.trimmed.fa",
-        "$out_dir/$n.combined.trimmed.aa.tab.txt",
-        "$out_dir/$t.combined.trimmed.aa.tab.txt",
-    );
-
-    delete_temp_files( @fastq_filenames, $output_file, "$output_file.run_to_create", @intermediate_files) unless $DEBUG;
-}
-
 done_testing();
 
 sub sref_from {
@@ -350,6 +305,10 @@ EEEEEEEEEEEEEEEEEEEEE
 ATGGACTTGCTCAGCGCTTAG
 +
 EEEEEEEEEEEEEEEEEEEEE
+@WXY:1:FLOWCELLXX:1:1:8000:8000 1:N:0:GGGGGG
+ATGAACTTGCTCAGCGCTTAG
++
+EEEEEEEEEEEEEEEEEEEEE
 END_OF_SECTION
     }
     elsif( $section eq 'input_fastq_reverse_t')
@@ -395,94 +354,8 @@ EEEEEEEEEEEEEEEEEEEEE
 CTAAGCGCTGAGCAAGTCCAT
 +
 EEEEEEEEEEEEEEEEEEEEE
-END_OF_SECTION
-    }
-    elsif( $section eq 'input_fastq_forward_t2')
-    {
-    return <<'END_OF_SECTION';
-@WXY:1:FLOWCELLXX:1:1:2:2 1:N:0:GGGGGG
-ATGTCGATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:4:4 1:N:0:GGGGGG
-ATGTCGATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:8:8 1:N:0:GGGGGG
-ATGTCGATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:16:16 1:N:0:GGGGGG
-ATGTCGATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:20:20 1:N:0:GGGGGG
-ATGATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:40:40 1:N:0:GGGGGG
-ATGATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:200:200 1:N:0:GGGGGG
-ATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:400:400 1:N:0:GGGGGG
-ATGACAGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:2000:2000 1:N:0:GGGGGG
-ATGGACTTGCTCAGCGCTTAG
-+
-EEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:20000:20000 1:N:0:GGGGGG
-ATGGACTTGCTCAGCATTTAG
-+
-EEEEEEEEEEEEEEEEEEEEE
-END_OF_SECTION
-    }
-    elsif( $section eq 'input_fastq_reverse_t2')
-    {
-    return <<'END_OF_SECTION';
-@WXY:1:FLOWCELLXX:1:1:2:2 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCATCGACAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:4:4 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCATCGACAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:8:8 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCATCGACAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:16:16 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCATCGACAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:20:20 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCATCAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:40:40 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCATCAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:200:200 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:400:400 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCTGTCAT
-+
-EEEEEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:2000:2000 2:N:0:GGGGGG
-CTAAGCGCTGAGCAAGTCCAT
-+
-EEEEEEEEEEEEEEEEEEEEE
-@WXY:1:FLOWCELLXX:1:1:20000:20000 2:N:0:GGGGGG
-CTAAATGCTGAGCAAGTCCAT
+@WXY:1:FLOWCELLXX:1:1:8000:8000 2:N:0:GGGGGG
+CTAAGCGCTGAGCAAGTTCAT
 +
 EEEEEEEEEEEEEEEEEEEEE
 END_OF_SECTION

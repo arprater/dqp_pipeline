@@ -17,6 +17,7 @@ my $t_forward_filename = '';
 my $t_reverse_filename = '';
 my $pre_capture_oligo  = '';
 my $post_capture_oligo = '';
+my $min_read_count     = 2;
 GetOptions(
     "nf=s"   => \$n_forward_filename,
     "nr=s"   => \$n_reverse_filename,
@@ -25,6 +26,7 @@ GetOptions(
     "pre=s"  => \$pre_capture_oligo,
     "post=s" => \$post_capture_oligo,
     "out=s"  => \$out_dir,
+    "min=i"  => \$min_read_count,
 );
 
 
@@ -69,8 +71,8 @@ $Bin/fasta_trim $t_combined $pre_capture_oligo $post_capture_oligo > $t_trimmed
 $Bin/trans_cdna $n_trimmed fasta > $n_aa
 $Bin/trans_cdna $t_trimmed fasta > $t_aa
 
-$Bin/count $n_aa $n_count_base            
-$Bin/count $t_aa $t_count_base
+$Bin/count $n_aa $n_count_base $min_read_count           
+$Bin/count $t_aa $t_count_base $min_read_count
 
 $Bin/compare $n_count_tab $t_count_tab > $output_file
 
