@@ -62,3 +62,5 @@ BioPerl
 This requires that pandaseq already be installed and be in $PATH.
 
 This currently requires paired-end reads (but processing of single-end reads could easily be implemented)
+
+This requires the File::Slurp module be installed
