@@ -96,32 +96,63 @@ sub remove_path_and_ext
 
 sub exit_giving_usage
 {
-    say <<"END";
+    say <<"END-USAGE";
 USAGE:
 
-Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo):
+    dqp_pipeline --nf <file name> --nr <file name> --tf <file name> --tr=<file name> --out <dir name> --pre=<DNA nucleotide sequence> --post=<DNA nucleotide sequence> [--min=<number>]" );
 
-    $0 n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG
+    --nf FASTQ file containing the "(n)egative" sample's (f)orward reads
+    --nr FASTQ file containing the "(n)egative" sample's (r)everse reads
+    --tf FASTQ file containing the "(t)arget" sample's (f)orward reads
+    --tr FASTQ file containing the "(t)arget" sample's (r)everse reads
 
-"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control.
-"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control.
-"t_forward.fq" is the FASTQ file for the forward reads of the target selection control.
-"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control.
+    --pre DNA nucleotide sequence preceding the sequence of interest. To avoid a frameshift in the computed translation, this should be the sequence immediately preceding the first codon that you desire translated.
+    --post DNA nucleotide sequence immediately following the sequence of interest.
 
-Intermediate files created
+    Together the "--pre" and "--post" sequences define a region that will be "trimmed" out. 
 
-n.combined.fa                       t.combined.fa
-n.combined.trimmed.fa               t.combined.trimmed.fa
-n.combined.trimmed.aa.fa            t.combined.trimmed.aa.fa
-n.combined.trimmed.aa.count.fa      t.combined.trimmed.aa.count.fa
-n.combined.trimmed.aa.count.tab.txt t.combined.trimmed.aa.count.tab.txt
+    --min Minimum read count to be included in the analysis.
 
-Output will be
+    $0 --nf=n_forward.fq --nr=n_reverse.fq --tf=t_forward.fq --tr=t_reverse.fq --pre=ATG --post=TAG --min=5
 
-n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
-n.compared_to.t.table.txt
+Example use of pipeline:
 
-END
+    dqp_pipeline --nf=n.forward_reads.fastq.gz --nr=n.reverse_reads.fastq.gz --tf=t.forward_reads.fastq.gz --tr=t.reverse_reads_fastq.gz --out=out.dir --pre=AAACCCATG --post=GGGTTTTAG --min=2
+
+# Intermediate files created in the specified directory (named as for this example)
+
+FASTA nucleotide files containing the sequence of the forward and reverse reads of the same fragment combined (using pandaseq with its defaults):
+
+    n.combined.fa
+    t.combined.fa
+
+FASTA nucelotide files containing the nucleotide sequence between the "pre" and "post" sequences (nonmatching sequences are currently ignored) 
+
+    n.combined.trimmed.fa
+    t.combined.trimmed.fa
+
+FASTA protein files containing the translation of the "trimmed" files
+
+    n.combined.trimmed.aa.fa
+    t.combined.trimmed.aa.fa
+
+The FASTA protein files made nonredundant, counts of each sequence, and reads per million (RPMs) are included in the sequence identifier.
+
+    n.combined.trimmed.aa.count.fa
+    t.combined.trimmed.aa.count.fa
+
+Tabular version of the nonredundant FASTA protein files
+
+    n.combined.trimmed.aa.count.tab.txt
+    t.combined.trimmed.aa.count.tab.txt
+
+# Final output (named as for this example)
+
+The final output is a table containing a comparison of the original two files. For cases in which one or the other sample lacked reads, an RPM of 0.001 is used in calculating log (RPMt/RPMn) where RPMt is the RPM of the sequence from the target sample and RMPn is the RPM of the sequence from the "negative" sample. In this case, the name of this table would be 
+
+    n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
+
+END-USAGE
 
     exit;
 }
@@ -131,31 +162,3 @@ sub looks_like_flag
     my $arg = shift;
     return index($arg, '-') == 0;
 }
-
-=begin
-
-=SYNOPSIS
-
-Example (where "ATG" is the pre-capture olig and "TAG" is the post-capture oligo):
-
-    dqp_pipeline n_forward.fq n_reverse.fq t_forward.fq t_reverse.fq ATG TAG out_dir
-
-"n_forward.fq" is the FASTQ file for the forward reads of the negative selection control.
-"n_reverse.fq" is the FASTQ file for the reverse reads of the negative selection control.
-"t_forward.fq" is the FASTQ file for the forward reads of the target selection control.
-"t_reverse.fq" is the FASTQ file for the reverse reads of the target selection control.
-
-Intermediate files created
-
-n.combined.fa                       t.combined.fa
-n.combined.trimmed.fa               t.combined.trimmed.fa
-n.combined.trimmed.aa.fa            t.combined.trimmed.aa.fa
-n.combined.trimmed.aa.count.fa      t.combined.trimmed.aa.count.fa
-n.combined.trimmed.aa.count.tab.txt t.combined.trimmed.aa.count.tab.txt
-
-Output will be
-
-n.combined.trimmed.aa.count.tab.compared_to.t.combined.trimmed.aa.count.tab.txt
-
-
-=cut

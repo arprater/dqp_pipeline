@@ -87,10 +87,11 @@ sub exit_giving_usage
 {
     say <<"END";
 USAGE:
-    $0 in_file_name.fa base
+    $0 <input file name> <base name> [minimum read count]
 
     Input file name can be anything.
-    Output files will be named whatever is specified as "base" followed by "count.fa" or "tab.txt".
+    Output files will be named whatever is specified as "base name" followed by ".count.fa" or ".tab.txt".
+    Minimum read count defaults to 2.
 END
     exit;
 }

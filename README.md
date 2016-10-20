@@ -1,7 +1,7 @@
 # dqp_pipeline
 Pipeline for dqp project
 
-    dqp_pipeline --nf <file name> --nr <file name> --tf <file name> --tr=<file name> --out <dir name> --pre=<DNA nucleotide sequence> --post=<DNA nucleotide sequence>" );
+    dqp_pipeline --nf <file name> --nr <file name> --tf <file name> --tr=<file name> --out <dir name> --pre=<DNA nucleotide sequence> --post=<DNA nucleotide sequence> [--min=<number>]" );
 
     --nf FASTQ file containing the "(n)egative" sample's (f)orward reads
     --nr FASTQ file containing the "(n)egative" sample's (r)everse reads
@@ -13,13 +13,13 @@ Pipeline for dqp project
 
     Together the "--pre" and "--post" sequences define a region that will be "trimmed" out. 
 
-    Besides the intermediate files 
+    --min Minimum read count to be included in the analysis.
 
 # SYNOPSIS
 
 Example use of pipeline:
 
-    dqp_pipeline --nf=n.forward_reads.fastq.gz --nr=n.reverse_reads.fastq.gz --tf=t.forward_reads.fastq.gz --tr=t.reverse_reads_fastq.gz --out=out.dir --pre=AAACCCATG --post=GGGTTTTAG
+    dqp_pipeline --nf=n.forward_reads.fastq.gz --nr=n.reverse_reads.fastq.gz --tf=t.forward_reads.fastq.gz --tr=t.reverse_reads_fastq.gz --out=out.dir --pre=AAACCCATG --post=GGGTTTTAG --min=2
 
 # Intermediate files created in the specified directory (named as for this example)
 
