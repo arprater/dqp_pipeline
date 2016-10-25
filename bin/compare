@@ -8,7 +8,7 @@ use List::MoreUtils qw( uniq );
 
 use File::Basename;
 
-my $DEFAULT_RPM = 0.001;
+my $DEFAULT_RPM = 0.1;
 
 ################################################################################
 # handle command line arguments
@@ -51,7 +51,7 @@ for my $seq (@sorted_seqs)
     # We expect some of these to be uninitialized and printing nothing is exactly what we want for them
     no warnings 'uninitialized';
 
-	say join("\t", $seq, $RPM_for_n{$seq}, $RPM_for_t{$seq}, $log2_for{$seq} ); 
+	say join("\t", $seq, $RPM_for_n{$seq} // $DEFAULT_RPM, $RPM_for_t{$seq} // $DEFAULT_RPM, $log2_for{$seq} ); 
 }
 
 sub read_RPMs_for 
