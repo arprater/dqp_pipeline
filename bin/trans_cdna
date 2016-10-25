@@ -3,6 +3,7 @@ use 5.010;
 use strict;
 use warnings;
 use autodie;
+use Data::Show;
 
 use File::Basename;
 
@@ -32,6 +33,7 @@ Report bugs via GitHub (https://github.com/MU-IRCF/dqp_pipeline/issues).
 =cut
 
 use Bio::SeqIO;
+use Bio::Tools::CodonTable;
 
 # Capture the first command line argument as the file name
 my $filename_in = shift // exit_giving_usage();
@@ -45,13 +47,18 @@ my ($format)    = shift // exit_giving_usage();
 my $seqin = Bio::SeqIO->new( -format => $format, -file => $filename_in); 
 
 while( (my $seq = $seqin->next_seq()) ) {
-    my $pseq    = $seq->translate();
-    my $just_aa = $pseq->seq();
+
+    my $sequence_text = $seq->seq();
+
+    my $codon_table = Bio::Tools::CodonTable->new();
+    my $table_id = $codon_table->add_table('ER2738(glnV)', 'FFLLSSSSYY*QCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG', '---M---------------M---------------M----------------------------');
+    $codon_table->id($table_id);
+    my $just_aa    = $codon_table->translate($sequence_text);
 
     # Find stop codon, if any
     my $first_stop_codon_index = index($just_aa, '*');
 
-    # Skip this sequence if it starts with a stop codon`
+    # Skip this sequence if it starts with a stop codon
     next if $first_stop_codon_index == 0;
 
     # Trim starting at the stop codon, if present

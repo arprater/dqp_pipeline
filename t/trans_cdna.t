@@ -52,7 +52,7 @@ sub expected
 {
     return <<'END';
 >parvalbumin-tidbit
-SMTDLLSA
+SMTDLLSAQ
 END
 }
 
@@ -60,7 +60,7 @@ sub fasta
 {
     return <<'END';
 >parvalbumin-tidbit
-TCGATGACAGACTTGCTCAGCGCTTAG
+TCGATGACAGACTTGCTCAGCGCTTAGTAA
 END
 }
 
