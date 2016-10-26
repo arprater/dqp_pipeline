@@ -70,4 +70,5 @@ This requires that PandaSeq already be installed and be in $PATH.
 
 This currently requires paired-end reads (but processing of single-end reads could easily be implemented)
 
-This requires the File::Slurp module be installed
+This requires the File::Slurp and Data::Show modules be installed
+
